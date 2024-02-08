@@ -1,4 +1,7 @@
-﻿using System;
+﻿using _24_Database_2024_Proj_1.utils;
+
+namespace _24_Database_2024_Proj_1;
+using System;
 using System.IO;
 
 class Program
@@ -10,6 +13,9 @@ class Program
         Disk storage = new Disk(diskSize, blockSize);
 
         Record record = new Record("tt0000001", 5.6f, 1645);
+        double size = RecordSizeCalculator.CalculateRecordSizeInBytes(record,Unit.Bytes);
+        Console.WriteLine($"Size: {size} Bytes");
+        Console.ReadKey();
         /*Block block = new Block(blockSize);
         byte[] newData = new byte[blockSize];
         block.Data = newData;
@@ -35,3 +41,5 @@ class Program
         }
     }
 }
+
+

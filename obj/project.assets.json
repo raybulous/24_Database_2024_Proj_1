@@ -8,19 +8,19 @@
     "net8.0": []
   },
   "packageFolders": {
-    "C:\\Users\\miizy\\.nuget\\packages\\": {}
+    "/Users/ray/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\miizy\\Downloads\\NTU\\SC3020\\24_Database_2024_Proj_1\\24_Database_2024_Proj_1.csproj",
+      "projectUniqueName": "/Users/ray/Documents/GitHub/24_Database_2024_Proj_1/24_Database_2024_Proj_1.csproj",
       "projectName": "24_Database_2024_Proj_1",
-      "projectPath": "C:\\Users\\miizy\\Downloads\\NTU\\SC3020\\24_Database_2024_Proj_1\\24_Database_2024_Proj_1.csproj",
-      "packagesPath": "C:\\Users\\miizy\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\miizy\\Downloads\\NTU\\SC3020\\24_Database_2024_Proj_1\\obj\\",
+      "projectPath": "/Users/ray/Documents/GitHub/24_Database_2024_Proj_1/24_Database_2024_Proj_1.csproj",
+      "packagesPath": "/Users/ray/.nuget/packages/",
+      "outputPath": "/Users/ray/Documents/GitHub/24_Database_2024_Proj_1/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\miizy\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/Users/ray/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -59,7 +59,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/Users/ray/.dotnet/sdk/8.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
