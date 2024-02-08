@@ -13,7 +13,7 @@ class Program
         Disk storage = new Disk(diskSize, blockSize);
 
         Record record = new Record("tt0000001", 5.6f, 1645);
-        double size = RecordSizeCalculator.CalculateRecordSizeInBytes(record,Unit.Bytes);
+        double size = RecordSizeCalculator.CalculateRecordSize(record,Unit.Bytes);
         Console.WriteLine($"Size: {size} Bytes");
         Console.ReadKey();
         /*Block block = new Block(blockSize);
