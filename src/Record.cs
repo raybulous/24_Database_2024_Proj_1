@@ -1,12 +1,13 @@
 using System.Text;
 
 namespace _24_Database_2024_Proj_1;
+using static Constants;
 
 public class Record
 {
-    private const int tConstLength = 10;
-    private const int floatSize = sizeof(float);
-    private const int intSize = sizeof(int);
+    private const int tConstLength = RecordConstants.TConstLength;
+    private const int floatSize = RecordConstants.FloatSize;
+    private const int intSize = RecordConstants.IntSize;
 
     public byte[] Data { get; private set; }
 

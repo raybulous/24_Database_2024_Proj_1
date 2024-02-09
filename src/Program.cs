@@ -1,4 +1,5 @@
 ﻿using _24_Database_2024_Proj_1.utils;
+using static _24_Database_2024_Proj_1.Constants;
 
 namespace _24_Database_2024_Proj_1;
 using System;
@@ -8,19 +9,41 @@ class Program
 {
     static void Main(string[] args)
     {
-        int diskSize = 100 * 1024 * 1024;
-        int blockSize = 200;
-        Disk storage = new Disk(diskSize, blockSize);
 
-        Record record = new Record("tt0000001", 5.6f, 1645);
-        double size = RecordSizeCalculator.CalculateRecordSize(record,Unit.Bytes);
-        Console.WriteLine($"Size: {size} Bytes");
-        Console.ReadKey();
-        /*Block block = new Block(blockSize);
-        byte[] newData = new byte[blockSize];
-        block.Data = newData;
+        Disk storage = new Disk(DiskConstants.MaxDiskSizeBytes, BlockConstants.MaxBlockSizeBytes);
+        Block block = new Block(BlockConstants.MaxBlockSizeBytes);
 
-        storage.writeBlock(0, block);*/
+        //Sample//
+        Record record = new Record("tt0000001", 5.6f, 1645); // Actual data will read from data.tsv
+        Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
+        Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
+        Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
+        
+        Console.WriteLine($"Record Size: {Utils.CalculateRecordSize(record)} Bytes");
+        if (block.AddRecord(record))
+        {
+            Console.WriteLine();
+            Console.WriteLine("Write Success");
+            Console.WriteLine();
+            Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
+            Console.WriteLine($"Max Reserved Available Block Space: {block.GetAvailableReservedSpace()}");
+            Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
+            Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
+        }
+        else
+        {
+            Console.WriteLine();
+            Console.WriteLine("Write Failed");
+            Console.WriteLine();
+            Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
+            Console.WriteLine($"Max Reserved Available Block Space: {block.GetAvailableReservedSpace()}");
+            Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
+            Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
+        }
+        // byte[] newData = new byte[BlockConstants.MaxBlockSizeBytes];
+        // block.Data = newData;
+
+        storage.WriteBlock(0, block);
     }
 
     private void addData()
