@@ -1,0 +1,94 @@
+using System;
+using System.Collections.Generic;
+using _24_Database_2024_Proj_1;
+using static _24_Database_2024_Proj_1.Constants;
+
+public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
+{
+    //limit degree to the size of the block (8 is the size of the pointer address)
+    public static int degree = (BlockConstants.MaxBlockSizeBytes - 8) / (8 + RecordConstants.IntSize);
+    private Node<TKey, TValue> root;
+
+    public BPlusTree()
+    {
+        //Initialise first node 
+        this.root = new LeafNode<TKey, TValue>();
+    }
+
+    public void Insert(TKey key, TValue value)
+    {
+        root.Insert(key, value);
+        if (root.IsOverflow) //Check if exceed degree
+        {
+            var newRoot = new InternalNode<TKey, TValue>(); //new node that will point to the 2 nodes from root.Split
+            newRoot.Children.Add(root);
+            root.Split(newRoot, 0);
+            root = newRoot; //Update root
+        }
+    }
+
+    public TValue Search(TKey key)
+    {
+        return root.Search(key);
+    }
+
+    public int CountNodes()
+    {
+        int nodeCount = 0;
+        Queue<Node<TKey, TValue>> queue = new Queue<Node<TKey, TValue>>();
+        queue.Enqueue(root);
+
+        while (queue.Count > 0)
+        {
+            int levelNodeCount = queue.Count;
+            for (int i = 0; i < levelNodeCount; i++)
+            {
+                Node<TKey, TValue> currentNode = queue.Dequeue();
+                nodeCount++;
+
+                if (currentNode is InternalNode<TKey, TValue> internalNode)
+                {
+                    foreach (var child in internalNode.Children)
+                    {
+                        queue.Enqueue(child);
+                    }
+                }
+            }
+        }
+
+        return nodeCount;
+    }
+
+    public int CountLevels()
+    {
+        if (root == null)
+            return 0;
+        int levels = 0;
+        Queue<Node<TKey, TValue>> queue = new Queue<Node<TKey, TValue>>();
+        queue.Enqueue(root);
+
+        while (queue.Count > 0)
+        {
+            int levelNodeCount = queue.Count;
+            for (int i = 0; i < levelNodeCount; i++)
+            {
+                Node<TKey, TValue> currentNode = queue.Dequeue();
+
+                if (currentNode is InternalNode<TKey, TValue> internalNode)
+                {
+                    foreach (var child in internalNode.Children)
+                    {
+                        queue.Enqueue(child);
+                    }
+                }
+            }
+            levels++;
+        }
+
+        return levels;
+    }
+
+    public Node<TKey, TValue> GetRoot(){
+        return root;
+    }
+}
