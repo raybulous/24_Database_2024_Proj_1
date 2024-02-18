@@ -16,7 +16,7 @@ public class Constants
     public static class BlockConstants
     {
         // Block Constants
-        public const int MaxBlockSizeBytes = 200 * 1024 * 1024; // 200MB in bytes
+        public const int MaxBlockSizeBytes = 200; // 200B in bytes
         
         /// <summary>
         /// This constant should not be used. Refer to [utils.Utils.MaxRecordCalculator] for the recommended approach.
