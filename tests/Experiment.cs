@@ -2,14 +2,18 @@ namespace _24_Database_2024_Proj_1;
 
 class Experiment
 {
+    Disk storage = new Disk(Constants.DiskConstants.MaxDiskSizeBytes, Constants.BlockConstants.MaxBlockSizeBytes);
+    BPlusTree<int, long> bTree = new BPlusTree<int, long>();
+
+    int numOfRecords = 0;
+    int numOfRecordsInBlock = 0;
+    int numOfBlocks = 0;
+
     public void runExp1()
     {
-        Disk storage = new Disk(Constants.DiskConstants.MaxDiskSizeBytes, Constants.BlockConstants.MaxBlockSizeBytes);
-        Block block = new Block(Constants.BlockConstants.MaxBlockSizeBytes);
+        Console.WriteLine("Experiment 1");
 
-        int numOfRecords = 0;
-        int numOfRecordsInBlock = 0;
-        int numOfBlocks = 0;
+        Block block = new Block(Constants.BlockConstants.MaxBlockSizeBytes);
 
         string currentDirectory = Directory.GetCurrentDirectory();
         string filePath = Path.Combine(currentDirectory, "..", "..", "..", "data.tsv");
@@ -52,6 +56,33 @@ class Experiment
         {
             Console.WriteLine("Can't find file");
         }
+        Console.WriteLine();
     }
 
+    public void runExp2()
+    {
+        Console.WriteLine("Experiment 2");
+        int recordsAdded = 0;
+
+
+        for (int i = 0; i < numOfBlocks; i++)
+        { //loop through datas
+            Block block = storage.ReadBlock(i);
+            for (int j = 0; j < numOfRecordsInBlock && recordsAdded < numOfRecords; j++ )
+            {
+                int position = j * (int)Constants.RecordConstants.RecordSize + Constants.RecordConstants.TConstLength + Constants.RecordConstants.FloatSize;
+                byte[] numVotesByte = new byte[Constants.RecordConstants.IntSize]; 
+                Buffer.BlockCopy(block.Data, position, numVotesByte, 0, Constants.RecordConstants.IntSize);
+                int numOfVotes = BitConverter.ToInt32(numVotesByte, 0);
+                long address = storage.GetArrayAddress(i * Constants.BlockConstants.MaxBlockSizeBytes + j * (int)Constants.RecordConstants.RecordSize);
+                bTree.Insert(numOfVotes, address);//insert the data sequentially
+                recordsAdded++;
+            }
+        }
+        Console.WriteLine($"The parameter n of the B+ tree: {BPlusTree<int, long>.degree}");
+        Console.WriteLine($"The number of nodes of the B+ tree: {bTree.CountNodes()}");
+        Console.WriteLine($"The number of levels of the B + tree: {bTree.CountLevels()}");
+        Console.WriteLine($"the content of the root node(only the keys): {bTree.GetRoot()}");
+        Console.WriteLine();
+    }
 }
