@@ -25,9 +25,6 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             root.Split(newRoot, 0);
             root = newRoot; //Update root
         }
-        DisplayTree();
-        Console.WriteLine("_________________________________________");
-        Console.ReadLine();
     }
 
     public void DisplayTree()
