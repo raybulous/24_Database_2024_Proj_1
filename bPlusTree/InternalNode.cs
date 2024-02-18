@@ -8,11 +8,14 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         Children = new List<Node<TKey, TValue>>();
     }
 
-    public override bool IsOverflow { get { return Keys.Count > BPlusTree<TKey, TValue>.degree - 1; } }
+    public override bool IsOverflow { get { return Keys.Count > BPlusTree<TKey, TValue>.degree; } }
 
     public override void Insert(TKey key, TValue value)
     {
         int index = FindIndexToInsert(key);
+        if(index == Children.Count){
+            index--;
+        }   
         Children[index].Insert(key, value);
         if (Children[index].IsOverflow)
         {
