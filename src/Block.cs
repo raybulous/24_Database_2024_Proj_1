@@ -30,6 +30,10 @@ public class Block
         }
 
         _records.Add(record);
+        
+        int position = _records.Count * (int)CalculateRecordSize(record) - (int)CalculateRecordSize(record);
+        Buffer.BlockCopy(record.Data, 0, Data, position , (int)CalculateRecordSize(record));
+
         return true;
     }
 
