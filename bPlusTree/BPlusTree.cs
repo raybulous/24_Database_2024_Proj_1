@@ -5,8 +5,8 @@ using static _24_Database_2024_Proj_1.Constants;
 
 public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
 {
-    //limit degree to the size of the block (8 is the size of the pointer address)
-    public static int degree = (BlockConstants.MaxBlockSizeBytes - 8) / (8 + RecordConstants.IntSize);
+    private const int LongSize = sizeof(long);
+    public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
     private Node<TKey, TValue> root;
 
     public BPlusTree()
@@ -24,6 +24,42 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             newRoot.Children.Add(root);
             root.Split(newRoot, 0);
             root = newRoot; //Update root
+        }
+        DisplayTree();
+        Console.WriteLine("_________________________________________");
+        Console.ReadLine();
+    }
+
+    public void DisplayTree()
+    {
+        Queue<Node<TKey, TValue>> queue = new Queue<Node<TKey, TValue>>();
+        queue.Enqueue(root);
+        while (queue.Count > 0)
+        {
+            int levelNodeCount = queue.Count;
+            for (int i = 0; i < levelNodeCount; i++)
+            {
+                Node<TKey, TValue> currentNode = queue.Dequeue();
+
+                if (currentNode is InternalNode<TKey, TValue> internalNode)
+                {
+                    foreach (var child in internalNode.Children)
+                    {
+                        queue.Enqueue(child);
+                    }
+                }
+
+                // Print keys in the current node
+                Console.Write("[");
+                for (int j = 0; j < currentNode.Keys.Count; j++)
+                {
+                    Console.Write($"{currentNode.Keys[j]}");
+                    if (j < currentNode.Keys.Count - 1)
+                        Console.Write(", ");
+                }
+                Console.Write("] ");
+            }
+            Console.WriteLine();
         }
     }
 
@@ -88,7 +124,8 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
         return levels;
     }
 
-    public Node<TKey, TValue> GetRoot(){
+    public Node<TKey, TValue> GetRoot()
+    {
         return root;
     }
 }
