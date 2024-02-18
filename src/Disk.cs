@@ -1,7 +1,7 @@
 namespace _24_Database_2024_Proj_1;
 using static _24_Database_2024_Proj_1.Constants;
 
-public class Disk
+public unsafe class Disk
 {
     private byte[] _disk;
     private int _blockSize = BlockConstants.MaxBlockSizeBytes;
@@ -20,6 +20,14 @@ public class Disk
         _recordCount = 0;
     }
 
+    public long GetArrayAddress(int bytePos)
+    {
+        fixed (byte* p = &_disk[bytePos])
+        {
+            return (long)p;
+        }
+    }
+
     public void WriteBlock(int blockNum, Block block) //write block to Disk
     {
         //Array.copy(source array, source starting index, destination array, destination starting index, bytes to copy);
@@ -33,6 +41,7 @@ public class Disk
         return block;
     }
 
+    /*
     public Address AppendRecord(Record record)
     {
         int blockId = GetIdOfLastBlock();
@@ -122,7 +131,7 @@ public class Disk
         }
 
         return recordList;
-    }
+    }*/
 
     public int GetCurrentBlockAccess() => _recordCount;
 }
