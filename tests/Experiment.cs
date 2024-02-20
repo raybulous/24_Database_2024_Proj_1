@@ -1,4 +1,8 @@
 namespace _24_Database_2024_Proj_1;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System;
+using System.Runtime.CompilerServices;
 
 class Experiment
 {
@@ -8,6 +12,8 @@ class Experiment
     int numOfRecords = 0;
     int numOfRecordsInBlock = 0;
     int numOfBlocks = 0;
+    double aveRating = 0;
+    Stopwatch stopwatch = new Stopwatch();
 
     public void runExp1()
     {
@@ -15,7 +21,8 @@ class Experiment
 
         Block block = new Block(Constants.BlockConstants.MaxBlockSizeBytes);
 
-        string currentDirectory = Directory.GetCurrentDirectory();
+        //string currentDirectory = Directory.GetCurrentDirectory();
+        string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
         string filePath = Path.Combine(currentDirectory, "..", "..", "..", "data.tsv");
         if (File.Exists(filePath))
         {
@@ -85,4 +92,32 @@ class Experiment
         Console.WriteLine($"the content of the root node(only the keys): {bTree.GetRoot()}");
         Console.WriteLine();
     }
+
+    public void runExp3()
+    {
+        Console.WriteLine("Experiment 3");
+
+        // Start timing the retrieval process
+        stopwatch.Restart();
+        var recordPositions = bTree.RetrieveValuesMeetingCondition(key => key == 500);
+        stopwatch.Stop();
+        long retrievalTime = stopwatch.ElapsedMilliseconds;
+
+        // Fetch records from positions
+        // var records = storage.FetchRecordsFromPositions(recordPositions);
+
+        // foreach (var record in records)
+        // {
+        //     aveRating += Record.ExtractAverageRating(record);
+        // }
+
+        // aveRating /= records.Count;
+
+        // Display the statistics
+        Console.WriteLine($"Number of index nodes accessed: {bTree.CountIndexNodesAccessed(key => key == 500)}");
+        Console.WriteLine($"Number of data blocks accessed: {recordPositions.Count}");
+        Console.WriteLine($"Average of averageRating's: {aveRating}");
+        Console.WriteLine($"Running time of the retrieval process: {retrievalTime} ms");
+    }
+    
 }

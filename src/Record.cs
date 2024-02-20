@@ -18,4 +18,16 @@ public class Record
         Buffer.BlockCopy(BitConverter.GetBytes(averageRating), 0, Data, tConstLength, floatSize);
         Buffer.BlockCopy(BitConverter.GetBytes(numVotes), 0, Data, tConstLength + floatSize, intSize);
     }
+
+    public static float ExtractAverageRating(byte[] recordBytes)
+        {
+            if (recordBytes == null || recordBytes.Length < tConstLength + floatSize + intSize)
+            {
+                throw new ArgumentException("Invalid record byte array.", nameof(recordBytes));
+            }
+
+            // Extract the bytes for averageRating, knowing its position and size
+            int averageRatingOffset = tConstLength;
+            return BitConverter.ToSingle(recordBytes, averageRatingOffset);
+        }
 }

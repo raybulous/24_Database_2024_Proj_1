@@ -125,4 +125,65 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     {
         return root;
     }
+
+    // Method to retrieve values that meet a specific condition on keys
+    public List<TValue> RetrieveValuesMeetingCondition(Func<TKey, bool> condition)
+    {
+        List<TValue> matchingValues = new List<TValue>();
+        TraverseAndCollect(root, condition, matchingValues);
+        return matchingValues;
+    }
+
+    // Helper method to traverse the tree and collect values
+    private void TraverseAndCollect(Node<TKey, TValue> node, Func<TKey, bool> condition, List<TValue> matchingValues)
+    {
+        if (node is LeafNode<TKey, TValue> leaf)
+        {
+            // Leaf node, check each key against the condition
+            for (int i = 0; i < leaf.Keys.Count; i++)
+            {
+                if (condition(leaf.Keys[i]))
+                {
+                    matchingValues.Add(leaf.Values[i]);
+                }
+            }
+        }
+        else if (node is InternalNode<TKey, TValue> internalNode)
+        {
+            // Internal node, recursively traverse child nodes
+            foreach (var child in internalNode.Children)
+            {
+                TraverseAndCollect(child, condition, matchingValues);
+            }
+        }
+    }
+
+    public int CountIndexNodesAccessed(Func<TKey, bool> condition)
+    {
+        int count = 0;
+        CountNodes(root, condition, ref count);
+        return count;
+    }
+
+    // Helper method to count index nodes accessed during traversal
+    private void CountNodes(Node<TKey, TValue> node, Func<TKey, bool> condition, ref int count)
+    {
+        if (node is InternalNode<TKey, TValue>)
+        {
+            count++; // Counting this node as accessed
+            InternalNode<TKey, TValue> internalNode = (InternalNode<TKey, TValue>)node;
+            foreach (var child in internalNode.Children)
+            {
+                CountNodes(child, condition, ref count);
+            }
+        }
+        else if (node is LeafNode<TKey, TValue> leaf)
+        {
+            // Optionally, count leaf nodes if they match the condition
+            if (leaf.Keys.Exists(k => condition(k)))
+            {
+                count++;
+            }
+        }
+    }
 }

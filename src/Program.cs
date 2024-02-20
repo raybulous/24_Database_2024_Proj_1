@@ -9,41 +9,47 @@ class Program
 {
     static void Main(string[] args)
     {
+        Experiment experiment = new Experiment(); // Create an instance of the Experiment class
 
-        Disk storage = new Disk(DiskConstants.MaxDiskSizeBytes, BlockConstants.MaxBlockSizeBytes);
-        Block block = new Block(BlockConstants.MaxBlockSizeBytes);
+        // Call the runExp1 and runExp2 methods
+        experiment.runExp1();
+        experiment.runExp2();
+        experiment.runExp3();
 
-        //Sample//
-        Record record = new Record("tt0000001", 5.6f, 1645); // Actual data will read from data.tsv
-        Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
-        Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
-        Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
+        // Disk storage = new Disk(DiskConstants.MaxDiskSizeBytes, BlockConstants.MaxBlockSizeBytes);
+        // Block block = new Block(BlockConstants.MaxBlockSizeBytes);
+
+        // //Sample//
+        // Record record = new Record("tt0000001", 5.6f, 1645); // Actual data will read from data.tsv
+        // Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
+        // Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
+        // Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
         
-        Console.WriteLine($"Record Size: {Utils.CalculateRecordSize(record)} Bytes");
-        if (block.AddRecord(record))
-        {
-            Console.WriteLine();
-            Console.WriteLine("Write Success");
-            Console.WriteLine();
-            Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
-            Console.WriteLine($"Max Reserved Available Block Space: {block.GetAvailableReservedSpace()}");
-            Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
-            Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
-        }
-        else
-        {
-            Console.WriteLine();
-            Console.WriteLine("Write Failed");
-            Console.WriteLine();
-            Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
-            Console.WriteLine($"Max Reserved Available Block Space: {block.GetAvailableReservedSpace()}");
-            Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
-            Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
-        }
-        // byte[] newData = new byte[BlockConstants.MaxBlockSizeBytes];
-        // block.Data = newData;
+        // Console.WriteLine($"Record Size: {Utils.CalculateRecordSize(record)} Bytes");
+        // if (block.AddRecord(record))
+        // {
+        //     Console.WriteLine();
+        //     Console.WriteLine("Write Success");
+        //     Console.WriteLine();
+        //     Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
+        //     Console.WriteLine($"Max Reserved Available Block Space: {block.GetAvailableReservedSpace()}");
+        //     Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
+        //     Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
+        // }
+        // else
+        // {
+        //     Console.WriteLine();
+        //     Console.WriteLine("Write Failed");
+        //     Console.WriteLine();
+        //     Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
+        //     Console.WriteLine($"Max Reserved Available Block Space: {block.GetAvailableReservedSpace()}");
+        //     Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
+        //     Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
+        // }
+        // // byte[] newData = new byte[BlockConstants.MaxBlockSizeBytes];
+        // // block.Data = newData;
 
-        storage.WriteBlock(0, block);
+        // storage.WriteBlock(0, block);
     }
 
     private void addData()

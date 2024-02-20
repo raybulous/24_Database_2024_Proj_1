@@ -10,6 +10,7 @@ public unsafe class Disk
     private int _recordCount;
     public int SizeOfDiskUsed => _blockCount * _blockSize;
     private int GetIdOfLastBlock() => _blockCount > 0 ? _blockCount - 1 : -1;
+    private int recordSize = RecordConstants.TConstLength + RecordConstants.FloatSize + RecordConstants.IntSize;
 
     public Disk(int diskSize, int blockSize) //Create disk of diskSize bytes
     {
@@ -39,6 +40,18 @@ public unsafe class Disk
         Block block = new Block(_blockSize);
         Array.Copy(_disk, blockNum * _blockSize, block.Data, 0, _blockSize);
         return block;
+    }
+
+    public List<byte[]> FetchRecordsFromPositions(List<long> positions)
+    {
+        List<byte[]> records = new List<byte[]>();
+        foreach (var position in positions)
+        {
+            byte[] recordBytes = new byte[recordSize]; // Define RecordSize accordingly
+            Array.Copy(_disk, position, recordBytes, 0, recordSize);
+            records.Add(recordBytes);
+        }
+        return records;
     }
 
     /*

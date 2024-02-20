@@ -29,7 +29,7 @@ public class Address
             this.offset = offset;
         }
 
-        public override string toString()
+        public string toString()
         {
             return string.Format("@{0}-{1}", blkId, offset);
         }
