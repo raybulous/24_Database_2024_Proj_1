@@ -17,7 +17,24 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
 
     public void Insert(TKey key, TValue value)
     {
-        root.Insert(key, value);
+        var sibling = root.Insert(key, value);
+        if(sibling != null){
+            var newRoot = new InternalNode<TKey, TValue>();
+            newRoot.Children.Add(root);
+            newRoot.Children.Add(sibling);
+            TKey newKey;
+            while(true){
+                if(sibling.Children.Count > 0 && sibling.Children[0] is InternalNode<TKey, TValue>){
+                    sibling = (InternalNode<TKey, TValue>)sibling.Children[0];
+                } else {
+                    var leafNode = (LeafNode<TKey, TValue>)sibling.Children[0];
+                    newKey = leafNode.Keys[0];
+                    break;
+                }
+            }
+            newRoot.Keys.Add(newKey);
+            root = newRoot;
+        }
         if (root.IsOverflow) //Check if exceed degree
         {
             var newRoot = new InternalNode<TKey, TValue>(); //new node that will point to the 2 nodes from root.Split
@@ -25,6 +42,9 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             root.Split(newRoot, 0);
             root = newRoot; //Update root
         }
+        //Console.WriteLine($"Inserted: {key}");
+        //DisplayTree();
+        //Console.ReadLine();
     }
 
     public void DisplayTree()
