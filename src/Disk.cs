@@ -10,6 +10,7 @@ public unsafe class Disk
     private int _recordCount;
     public int SizeOfDiskUsed => _blockCount * _blockSize;
     private int GetIdOfLastBlock() => _blockCount > 0 ? _blockCount - 1 : -1;
+    private int recordSize = RecordConstants.TConstLength + RecordConstants.FloatSize + RecordConstants.IntSize;
 
     public Disk(int diskSize, int blockSize) //Create disk of diskSize bytes
     {
@@ -39,6 +40,51 @@ public unsafe class Disk
         Block block = new Block(_blockSize);
         Array.Copy(_disk, blockNum * _blockSize, block.Data, 0, _blockSize);
         return block;
+    }
+
+    public List<byte[]> FetchRecordsFromPositions(List<long> positions)
+    {
+        List<byte[]> records = new List<byte[]>();
+        foreach (var position in positions)
+        {
+            if (position < 0 || position + recordSize > _disk.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(position), "Position is outside the bounds of the disk array.");
+            }
+
+            byte[] recordBytes = new byte[recordSize];
+            Array.Copy(_disk, position, recordBytes, 0, recordSize);
+            records.Add(recordBytes);
+        }
+        return records;
+    }
+
+
+    public List<byte[]> BruteForceScan(Func<byte[], bool> matchesCondition)
+    {
+        List<byte[]> matchingRecords = new List<byte[]>();
+        int numberOfBlocks = _disk.Length / _blockSize;
+        int recordsPerBlock = _blockSize / recordSize;
+
+        for (int blockIndex = 0; blockIndex < numberOfBlocks; blockIndex++)
+        {
+            for (int recordIndex = 0; recordIndex < recordsPerBlock; recordIndex++)
+            {
+                long position = (long)blockIndex * _blockSize + (long)recordIndex * recordSize;
+                if (position + recordSize > _disk.Length) 
+                    break; // Avoid reading beyond the disk
+
+                byte[] recordBytes = new byte[recordSize];
+                Array.Copy(_disk, position, recordBytes, 0, recordSize);
+
+                if (matchesCondition(recordBytes))
+                {
+                    matchingRecords.Add(recordBytes);
+                }
+            }
+        }
+
+        return matchingRecords;
     }
 
     /*
