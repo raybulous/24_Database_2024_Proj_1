@@ -98,4 +98,10 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
         }
         return key;
     }
+
+    public override void DeleteRecord(long position)
+    {
+        //Yet to implement, need to delete record
+        //Find index of record, remove and update
+    }
 }
