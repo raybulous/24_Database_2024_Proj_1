@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace _24_Database_2024_Proj_1;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -97,31 +99,31 @@ class Experiment
     public void runExp3()
     {
         Console.WriteLine("Experiment 3");
-
         // Start timing the retrieval process
         stopwatch.Restart();
-        var recordPositions = bTree.RetrieveValuesMeetingCondition(key => key == 500);
+        List<long> recordPositions = bTree.RetrieveValuesMeetingCondition(key => key == 500);
         stopwatch.Stop();
         long retrievalTime = stopwatch.ElapsedMilliseconds;
-
+        long baseAddress = storage.GetArrayAddress(0); 
         // Calculate the average of AvgRating
-        // if (recordPositions.Count > 0)
-        // {
-        //     var records = storage.FetchRecordsFromPositions(recordPositions);
-        //     foreach (var recordBytes in records)
-        //     {
-        //         aveRating += Record.ExtractAverageRating(recordBytes);
-        //     }
-        //     aveRating /= records.Count; // Calculate the average rating
-        //     totalRecords = records.Count;
-        // }
-
-        Console.WriteLine("B+ Tree Retrieval:");
+        if (recordPositions.Count > 0)
+        {
+            List<long> addressList = storage.GetBytePositions(recordPositions,baseAddress);
+            var records = storage.FetchRecordsFromPositions(addressList);
+            foreach (var recordBytes in records)
+            {
+                double extractedRating = Record.ExtractAverageRating(recordBytes);
+                double roundedRating = Math.Round(extractedRating, 1);
+                aveRating += roundedRating;
+            }
+            aveRating /= records.Count; // Calculate the average rating
+        }
+        
+        Console.WriteLine("::B+ Tree Retrieval::");
         Console.WriteLine($"Number of index nodes accessed: {bTree.CountIndexNodesAccessed(key => key == 500)}");
-        Console.WriteLine($"Number of data blocks accessed: {recordPositions.Count}");
+        Console.WriteLine($"Total records found:: {recordPositions.Count}");
         Console.WriteLine($"Average of averageRating's: {aveRating}");
         Console.WriteLine($"Running time of the retrieval process: {retrievalTime} ms");
-        Console.WriteLine($"Total records found: {totalRecords}");
 
         // Reset for brute-force linear scan
         aveRating = 0;
@@ -141,7 +143,9 @@ class Experiment
         {
             foreach (var recordBytes in matchingRecords)
             {
-                aveRating += Record.ExtractAverageRating(recordBytes);
+                double extractedRating = Record.ExtractAverageRating(recordBytes);
+                double roundedRating = Math.Round(extractedRating, 1);
+                aveRating += roundedRating;
             }
             aveRating /= matchingRecords.Count;
             totalRecords = matchingRecords.Count;
@@ -151,11 +155,83 @@ class Experiment
         int bruteForceDataBlocksAccessed = matchingRecords.Count > 0 ? (int)Math.Ceiling((double)matchingRecords.Count / Constants.BlockConstants.MaxRecordsPerBlock) : 0;
 
         // Display the statistics
-        Console.WriteLine("Brute-Force Scan:");
+        Console.WriteLine("::Brute-Force Scan::");
         Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceDataBlocksAccessed}");
         Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
         Console.WriteLine($"Average of averageRating's: {aveRating}");
         Console.WriteLine($"Total records found: {totalRecords}");
     }
+
+    public void runExp4()
+    {
+    Console.WriteLine("Experiment 4");
+
+    // Reset for brute-force linear scan
+    aveRating = 0.0;
+    totalRecords = 0;
+
+    // Start timing the retrieval process for B+ Tree
+    stopwatch.Restart();
+    var recordPositions = bTree.RetrieveValuesMeetingCondition(key => key >= 30000 && key <= 40000);
+    stopwatch.Stop();
+    long retrievalTime = stopwatch.ElapsedMilliseconds;
+    long baseAddress = storage.GetArrayAddress(0); 
+    // Calculate the average of AvgRating
+    if (recordPositions.Count > 0)
+    {
+        totalRecords = recordPositions.Count;
+        List<long> addressList = storage.GetBytePositions(recordPositions,baseAddress);
+        var records = storage.FetchRecordsFromPositions(addressList);
+        foreach (var recordBytes in records)
+        {
+            double extractedRating = Record.ExtractAverageRating(recordBytes);
+            double roundedRating = Math.Round(extractedRating, 1);
+            aveRating += roundedRating;
+        }
+        aveRating /= records.Count; // Calculate the average rating
+    }
+
+    Console.WriteLine("::B+ Tree Retrieval::");
+    Console.WriteLine($"Number of index nodes accessed: {bTree.CountIndexNodesAccessed(key => key >= 30000 && key <= 40000)}");
+    Console.WriteLine($"Number of data blocks accessed: {recordPositions.Count}");
+    Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
+    Console.WriteLine($"Running time of the retrieval process: {retrievalTime} ms");
+    Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation
+
+    // Reset for brute-force linear scan
+    aveRating = 0.0;
+    totalRecords = 0;
+
+    // Brute-force linear scan
+    stopwatch.Restart();
+    var matchingRecords = storage.BruteForceScan(recordBytes =>
+    {
+        int numVotes = Record.ExtractNumVotes(recordBytes);
+        return numVotes >= 30000 && numVotes <= 40000;
+    });
+    stopwatch.Stop();
+    long bruteForceTime = stopwatch.ElapsedMilliseconds;
     
+    // Calculate the average of AvgRating
+    if (matchingRecords.Count > 0)
+    {
+        foreach (var recordBytes in matchingRecords)
+        {
+            double extractedRating = Record.ExtractAverageRating(recordBytes);
+            double roundedRating = Math.Round(extractedRating, 1);
+            aveRating += roundedRating;
+        }
+        aveRating /= matchingRecords.Count;
+        totalRecords = matchingRecords.Count;
+    }
+
+    // Assuming each block is fully utilized for simplicity, calculate average rating and blocks accessed
+    int bruteForceDataBlocksAccessed = matchingRecords.Count > 0 ? (int)Math.Ceiling((double)matchingRecords.Count / Constants.BlockConstants.MaxRecordsPerBlock) : 0;
+
+    Console.WriteLine("::Brute-Force Scan::");
+    Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceDataBlocksAccessed}");
+    Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
+    Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
+    Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation
+    }
 }

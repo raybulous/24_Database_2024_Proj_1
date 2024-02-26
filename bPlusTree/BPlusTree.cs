@@ -42,9 +42,9 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             root.Split(newRoot, 0);
             root = newRoot; //Update root
         }
-        //Console.WriteLine($"Inserted: {key}");
-        //DisplayTree();
-        //Console.ReadLine();
+        // Console.WriteLine($"Inserted: {key}");
+        // DisplayTree();
+        // Console.ReadLine();
     }
 
     public void DisplayTree()
@@ -83,6 +83,19 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     public TValue Search(TKey key)
     {
         return root.Search(key);
+    }
+
+    public TValue GetRootValue()
+    {
+        if (root is LeafNode<TKey, TValue> leafNode)
+        {
+            return leafNode.Values.Count > 0 ? leafNode.Values[0] : default(TValue);
+        }
+        else
+        {
+            // Possibly throw an exception or return a default value, since internal nodes do not contain direct values.
+            throw new InvalidOperationException("Root is an internal node and does not contain direct values.");
+        }
     }
 
     public int CountNodes()

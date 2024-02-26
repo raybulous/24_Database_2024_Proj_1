@@ -13,8 +13,13 @@ class Program
 
         // Call the runExp1 and runExp2 methods
         experiment.runExp1();
+        Console.WriteLine();
         experiment.runExp2();
+        Console.WriteLine();
         experiment.runExp3();
+        Console.WriteLine();
+        experiment.runExp4();
+        Console.WriteLine();
 
         // Disk storage = new Disk(DiskConstants.MaxDiskSizeBytes, BlockConstants.MaxBlockSizeBytes);
         // Block block = new Block(BlockConstants.MaxBlockSizeBytes);

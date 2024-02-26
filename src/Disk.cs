@@ -28,6 +28,14 @@ public unsafe class Disk
             return (long)p;
         }
     }
+    
+    public List<long> GetBytePositions(List<long> addresses, long baseAddress)
+    {
+        List<long> relativeOffsets = addresses.Select(address => address - baseAddress).ToList();
+        return relativeOffsets;
+    }
+
+
 
     public void WriteBlock(int blockNum, Block block) //write block to Disk
     {
@@ -47,7 +55,8 @@ public unsafe class Disk
         List<byte[]> records = new List<byte[]>();
         foreach (var position in positions)
         {
-            if (position < 0 || position + recordSize > _disk.Length)
+            // Ensure position is within the bounds of the disk
+            if (position < 0 || position >= _disk.Length || position + recordSize > _disk.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(position), "Position is outside the bounds of the disk array.");
             }
@@ -58,6 +67,16 @@ public unsafe class Disk
         }
         return records;
     }
+    
+    public List<byte[]> test(long position)
+    {
+        List<byte[]> records = new List<byte[]>();
+        byte[] recordBytes = new byte[recordSize];
+        Array.Copy(_disk, position, recordBytes, 0, recordSize);
+        records.Add(recordBytes);
+        return records;
+    }
+
 
 
     public List<byte[]> BruteForceScan(Func<byte[], bool> matchesCondition)
