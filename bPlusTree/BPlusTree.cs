@@ -219,4 +219,10 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             }
         }
     }
+
+    public void DeleteRecord(long position)
+    {
+    root.DeleteRecord(position);
+
+    }
 }
