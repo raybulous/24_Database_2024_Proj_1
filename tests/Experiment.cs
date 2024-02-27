@@ -90,6 +90,7 @@ class Experiment
             }
         }
         List<int> rootKeys = bTree.GetRoot();
+        bTree.DisplayTree();
         string rootKeysString = "";
         for(int i=0; i< rootKeys.Count; i++){
             rootKeysString += rootKeys[i].ToString() + " ";
@@ -238,5 +239,79 @@ class Experiment
     Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
     Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
     Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation
+    }
+    
+    public void runExp5()
+    {
+        Console.WriteLine("Experiment 5");
+        bTree.DisplayTree();
+        bTree.Delete(1000);
+        bTree.DisplayTree();
+        
+
+    // // Start timing the retrieval process for B+ Tree
+    // stopwatch.Restart();
+    // var recordPositions = bTree.RetrieveValuesMeetingCondition(key => key == 1000);
+    // stopwatch.Stop();
+    // long retrievalTime = stopwatch.ElapsedMilliseconds;
+    // long baseAddress = storage.GetArrayAddress(0); 
+    // // Calculate the average of AvgRating
+    // if (recordPositions.Count > 0)
+    // {
+    //     totalRecords = recordPositions.Count;
+    //     List<long> addressList = storage.GetBytePositions(recordPositions,baseAddress);
+    //     var records = storage.FetchRecordsFromPositions(addressList);
+    //     foreach (var recordBytes in records)
+    //     {
+    //         bTree.Delete(recordBytes)
+    //         double extractedRating = Record.ExtractAverageRating(recordBytes);
+    //         double roundedRating = Math.Round(extractedRating, 1);
+    //         aveRating += roundedRating;
+    //     }
+    //     aveRating /= records.Count; // Calculate the average rating
+    // }
+
+        // Console.WriteLine("::B+ Tree Retrieval::");
+        // Console.WriteLine($"Number of index nodes accessed: {bTree.CountIndexNodesAccessed(key => key >= 30000 && key <= 40000)}");
+        // Console.WriteLine($"Number of data blocks accessed: {recordPositions.Count}");
+        // Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
+        // Console.WriteLine($"Running time of the retrieval process: {retrievalTime} ms");
+        // Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation
+        //
+        // // Reset for brute-force linear scan
+        // aveRating = 0.0;
+        // totalRecords = 0;
+        //
+        // // Brute-force linear scan
+        // stopwatch.Restart();
+        // var matchingRecords = storage.BruteForceScan(recordBytes =>
+        // {
+        //     int numVotes = Record.ExtractNumVotes(recordBytes);
+        //     return numVotes >= 30000 && numVotes <= 40000;
+        // });
+        // stopwatch.Stop();
+        // long bruteForceTime = stopwatch.ElapsedMilliseconds;
+        //
+        // // Calculate the average of AvgRating
+        // if (matchingRecords.Count > 0)
+        // {
+        //     foreach (var recordBytes in matchingRecords)
+        //     {
+        //         double extractedRating = Record.ExtractAverageRating(recordBytes);
+        //         double roundedRating = Math.Round(extractedRating, 1);
+        //         aveRating += roundedRating;
+        //     }
+        //     aveRating /= matchingRecords.Count;
+        //     totalRecords = matchingRecords.Count;
+        // }
+        //
+        // // Assuming each block is fully utilized for simplicity, calculate average rating and blocks accessed
+        // int bruteForceDataBlocksAccessed = matchingRecords.Count > 0 ? (int)Math.Ceiling((double)matchingRecords.Count / Constants.BlockConstants.MaxRecordsPerBlock) : 0;
+        //
+        // Console.WriteLine("::Brute-Force Scan::");
+        // Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceDataBlocksAccessed}");
+        // Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
+        // Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
+        // Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation
     }
 }

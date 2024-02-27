@@ -11,15 +11,18 @@ class Program
     {
         Experiment experiment = new Experiment(); // Create an instance of the Experiment class
 
-        // Call the runExp1 and runExp2 methods
+        // // Call the runExp1 and runExp2 methods
         experiment.runExp1();
         Console.WriteLine();
         experiment.runExp2();
         Console.WriteLine();
-        experiment.runExp3();
-        Console.WriteLine();
-        experiment.runExp4();
-        Console.WriteLine();
+        // experiment.runExp3();
+        // Console.WriteLine();
+        // experiment.runExp4();
+        // Console.WriteLine();
+        // BTreeTest.test1();
+        experiment.runExp5();
+        
 
         // Disk storage = new Disk(DiskConstants.MaxDiskSizeBytes, BlockConstants.MaxBlockSizeBytes);
         // Block block = new Block(BlockConstants.MaxBlockSizeBytes);
@@ -29,7 +32,7 @@ class Program
         // Console.WriteLine($"Max Available Block Size: {block.GetAvailableSpace()} Bytes");
         // Console.WriteLine($"Max Available Block Slots: {block.GetAvailableSlots()}");
         // Console.WriteLine($"Max Available Block Slots (Reserved): {block.GetAvailableReservedSlots()}");
-        
+
         // Console.WriteLine($"Record Size: {Utils.CalculateRecordSize(record)} Bytes");
         // if (block.AddRecord(record))
         // {

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using _24_Database_2024_Proj_1;
 using static _24_Database_2024_Proj_1.Constants;
 
 public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
@@ -42,7 +39,7 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             root.Split(newRoot, 0);
             root = newRoot; //Update root
         }
-        // Console.WriteLine($"Inserted: {key}");
+        Console.WriteLine($"Inserted: {key}");
         // DisplayTree();
         // Console.ReadLine();
     }
@@ -196,6 +193,24 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
         int count = 0;
         CountNodes(root, condition, ref count);
         return count;
+    }
+    
+    public bool Delete(TKey key)
+    {
+        // Step 1: Search and delete the key from the leaf node.
+        bool isDeleted = root.Delete(key);
+        if (!isDeleted)
+        {
+            return false; // Key not found.
+        }
+
+        // Step 2: Handle underflow from the root node.
+        if (root is InternalNode<TKey, TValue> && root.Keys.Count == 0)
+        {
+            // Promote the single child as the new root if root is empty.
+            root = ((InternalNode<TKey, TValue>)root).Children[0];
+        }
+        return true;
     }
 
     // Helper method to count index nodes accessed during traversal

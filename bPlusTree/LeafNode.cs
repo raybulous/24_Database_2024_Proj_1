@@ -2,12 +2,20 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
 {
     public List<TValue> Values { get; private set; }
     public LeafNode<TKey, TValue> Next { get; set; }
+    public List<TKey> Keys { get; set; }
+    public InternalNode<TKey, TValue> Parent { get; set; } // Parent reference
+
 
     public LeafNode()
     {
         Keys = new List<TKey>();
         Values = new List<TValue>();
         Next = null;
+    }
+    
+    public override TKey GetFirstKey()
+    {
+        return Keys.FirstOrDefault(); // Assuming Keys is a List<TKey>
     }
 
     public override bool IsOverflow { get { return Keys.Count > BPlusTree<TKey, TValue>.degree; } }
@@ -72,30 +80,179 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
         }
         return null;
     }
+    
+    public override bool Delete(TKey key)
+    {
+        int index = Keys.BinarySearch(key);
+        if (index < 0)
+        {
+            return false; // Key not found.
+        }
+        // Remove key and its value.
+        Keys.RemoveAt(index);
+        Values.RemoveAt(index);
+
+        // Check for underflow and handle it if necessary (borrow or merge).
+        HandleUnderflow();
+
+        return true;
+    }
+    
+    // Returns the left sibling of the current node, if it exists.
+    protected LeafNode<TKey, TValue> GetLeftSibling()
+    {
+        if (this.Parent == null) return null;
+        int myIndex = this.Parent.Children.IndexOf(this);
+        if (myIndex > 0)
+        {
+            return this.Parent.Children[myIndex - 1] as LeafNode<TKey, TValue>;
+        }
+        return null;
+    }
+    
+    // Returns the right sibling of the current node, if it exists.
+    protected LeafNode<TKey, TValue> GetRightSibling()
+    {
+        if (this.Parent == null) return null;
+        int myIndex = this.Parent.Children.IndexOf(this);
+        if (myIndex < this.Parent.Children.Count - 1)
+        {
+            return this.Parent.Children[myIndex + 1] as LeafNode<TKey, TValue>;
+        }
+        return null;
+    }
+    
+    // Updates the key in the parent node that points to this node.
+    protected void UpdateParentKey(TKey oldKey, TKey newKey)
+    {
+        int index = this.Parent.Keys.FindIndex(k => k.Equals(oldKey));
+        if (index == -1)
+        {
+            // Old key not found, indicating a potential inconsistency in the tree
+            throw new InvalidOperationException($"Attempted to update a non-existent key in a parent node. This indicates a potential inconsistency within the B+ tree structure. Old Key: {oldKey}, New Key: {newKey}");
+        }
+
+        // Existing logic for updating the key
+    }
+
+    
+    // Removes the current node from its parent's children list.
+    protected void RemoveFromParent()
+    {
+        if (this.Parent != null)
+        {
+            int index = this.Parent.Children.IndexOf(this);
+            if (index != -1)
+            {
+                this.Parent.Children.RemoveAt(index);
+                this.Parent.Keys.RemoveAt(index - 1); // Adjust parent keys accordingly. Be careful with index bounds.
+            }
+        }
+    }
+    
+    protected void HandleUnderflow()
+    {
+        if (this.Keys.Count >= this.MinKeys) return; // No underflow
+
+        LeafNode<TKey, TValue> leftSibling = this.GetLeftSibling();
+        LeafNode<TKey, TValue> rightSibling = this.GetRightSibling();
+
+        if (leftSibling != null && leftSibling.Keys.Count > this.MinKeys)
+        {
+            // Borrow from left
+            TKey borrowedKey = leftSibling.Keys.Last();
+            TValue borrowedValue = leftSibling.Values.Last();
+            leftSibling.Keys.Remove(borrowedKey);
+            leftSibling.Values.Remove(borrowedValue);
+            this.Keys.Insert(0, borrowedKey);
+            this.Values.Insert(0, borrowedValue);
+            this.UpdateParentKey(borrowedKey, this.Keys[0]);
+        }
+        else if (rightSibling != null && rightSibling.Keys.Count > this.MinKeys)
+        {
+            // Borrow from right
+            TKey borrowedKey = rightSibling.Keys.First();
+            TValue borrowedValue = rightSibling.Values.First();
+            rightSibling.Keys.RemoveAt(0);
+            rightSibling.Values.RemoveAt(0);
+            this.Keys.Add(borrowedKey);
+            this.Values.Add(borrowedValue);
+            rightSibling.UpdateParentKey(this.Keys.Last(), borrowedKey);
+        }
+        else if (leftSibling != null)
+        {
+            // Merge with left
+            foreach (var key in this.Keys)
+            {
+                leftSibling.Keys.Add(key);
+                leftSibling.Values.Add(this.Values[this.Keys.IndexOf(key)]);
+            }
+            leftSibling.Next = this.Next; // Assuming a linked list of leaves
+            this.RemoveFromParent();
+        }
+        else if (rightSibling != null)
+        {
+            // Merge with right
+            foreach (var key in rightSibling.Keys)
+            {
+                this.Keys.Add(key);
+                this.Values.Add(rightSibling.Values[rightSibling.Keys.IndexOf(key)]);
+            }
+            this.Next = rightSibling.Next;
+            rightSibling.RemoveFromParent();
+        }
+    }
 
     private TKey FindKeyValue(Node<TKey, TValue> inputNode)
     {
-        TKey key;
-        if (inputNode is InternalNode<TKey, TValue> node)
+        // Initialize a variable to hold the key. Assuming default(TKey) is a valid default for your key type.
+        TKey key = default(TKey);
+    
+        // Check if the inputNode is an InternalNode.
+        if (inputNode is InternalNode<TKey, TValue> internalNode)
         {
-            while (true)
+            // We need to find the left-most leaf node starting from this internal node.
+            Node<TKey, TValue> currentNode = internalNode;
+            while (currentNode != null)
             {
-                if (node.Children.Count > 0 && node.Children[0] is InternalNode<TKey, TValue>)
+                if (currentNode is LeafNode<TKey, TValue> leafNode)
                 {
-                    node = (InternalNode<TKey, TValue>)node.Children[0];
+                    // If the current node is a LeafNode, we take its first key.
+                    if (leafNode.Keys.Count > 0)
+                    {
+                        key = leafNode.Keys[0];
+                        break;
+                    }
+                }
+                else if (currentNode is InternalNode<TKey, TValue> currentInternalNode)
+                {
+                    // If the current node is an InternalNode, we go down to its first child.
+                    if (currentInternalNode.Children.Count > 0)
+                    {
+                        currentNode = currentInternalNode.Children[0];
+                    }
+                    else
+                    {
+                        // This should not happen in a well-formed B+ tree, but it's good to handle the case.
+                        break;
+                    }
                 }
                 else
                 {
-                    var leafNode = (LeafNode<TKey, TValue>)node.Children[0];
-                    key = leafNode.Keys[0];
+                    // If for some reason the node type is unknown, break the loop.
                     break;
                 }
             }
         }
-        else
+        else if (inputNode is LeafNode<TKey, TValue> leafNode)
         {
-            key = inputNode.Keys[0];
+            // If the input node is directly a LeafNode, we simply take its first key.
+            if (leafNode.Keys.Count > 0)
+            {
+                key = leafNode.Keys[0];
+            }
         }
+    
         return key;
     }
 }
