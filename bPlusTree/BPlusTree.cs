@@ -154,9 +154,9 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
         return levels;
     }
 
-    public Node<TKey, TValue> GetRoot()
+    public List<TKey> GetRoot()
     {
-        return root;
+        return root.Keys;
     }
 
     // Method to retrieve values that meet a specific condition on keys

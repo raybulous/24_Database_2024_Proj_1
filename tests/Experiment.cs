@@ -89,10 +89,15 @@ class Experiment
                 recordsAdded++;
             }
         }
+        List<int> rootKeys = bTree.GetRoot();
+        string rootKeysString = "";
+        for(int i=0; i< rootKeys.Count; i++){
+            rootKeysString += rootKeys[i].ToString() + " ";
+        }
         Console.WriteLine($"The parameter n of the B+ tree: {BPlusTree<int, long>.degree}");
         Console.WriteLine($"The number of nodes of the B+ tree: {bTree.CountNodes()}");
         Console.WriteLine($"The number of levels of the B + tree: {bTree.CountLevels()}");
-        Console.WriteLine($"the content of the root node(only the keys): {bTree.GetRoot()}");
+        Console.WriteLine($"the content of the root node(only the keys): {rootKeysString}");
         Console.WriteLine();
     }
 
