@@ -20,8 +20,6 @@ class Program
         Console.WriteLine();
         experiment.runExp4();
         Console.WriteLine();
-        //experiment.runExp5();
-        //Console.WriteLine();
 
         // Disk storage = new Disk(DiskConstants.MaxDiskSizeBytes, BlockConstants.MaxBlockSizeBytes);
         // Block block = new Block(BlockConstants.MaxBlockSizeBytes);
