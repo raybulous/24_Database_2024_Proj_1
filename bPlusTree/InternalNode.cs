@@ -70,24 +70,6 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         return null;
     }
 
-    public override void DeleteRecord(long position)
-    {
-        // Traverse to the appropriate child and delete the record
-        int childIndex = FindChildIndexToDelete(position);
-        Children[childIndex].DeleteRecord(position);
-    }
-
-    private int FindChildIndexToDelete(TKey key)
-    {
-        int index = 0;
-        while (index < Keys.Count && key.CompareTo(Keys[index]) >= 0)
-        {
-            index++;
-        }
-        return index;
-    }
-
-
     private int FindIndexToInsert(TKey key)
     {
         int index = 0;
