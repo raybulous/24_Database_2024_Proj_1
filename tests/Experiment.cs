@@ -240,7 +240,7 @@ class Experiment
     Console.WriteLine("Experiment 5");
 
     // Reset for B+ Tree update
-    // Need to write a function here (Shenal)
+    bTree.Clear();
 
     // Start timing the update process
     stopwatch.Restart();
@@ -250,7 +250,6 @@ class Experiment
     foreach (var recordPosition in recordsToDelete)
     {
         storage.DeleteRecord(recordPosition);
-        // Need to finish this function (Shenal)
     }
 
     // Rebuild the B+ Tree after deletion
