@@ -90,7 +90,7 @@ class Experiment
             }
         }
         List<int> rootKeys = bTree.GetRoot();
-        bTree.DisplayTree();
+        // bTree.DisplayTree();
         string rootKeysString = "";
         for(int i=0; i< rootKeys.Count; i++){
             rootKeysString += rootKeys[i].ToString() + " ";
@@ -244,9 +244,9 @@ class Experiment
     public void runExp5()
     {
         Console.WriteLine("Experiment 5");
-        bTree.DisplayTree();
+        // bTree.DisplayTree();
         bTree.Delete(1000);
-        bTree.DisplayTree();
+        // bTree.DisplayTree();
         
 
     // // Start timing the retrieval process for B+ Tree

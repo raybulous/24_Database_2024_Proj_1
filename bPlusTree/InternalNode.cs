@@ -1,6 +1,5 @@
 public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparable<TKey>
 {
-    public List<TKey> Keys { get; set; }
     public List<Node<TKey, TValue>> Children { get; private set; }
     private int MinKeys => (int)Math.Ceiling(BPlusTree<TKey, TValue>.degree / 2.0) - 1;
     public InternalNode<TKey, TValue> Parent { get; set; } // Parent reference
@@ -203,25 +202,75 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
     
     protected void HandleChildUnderflow(int childIndex)
     {
-        Node<TKey, TValue> child = this.Children[childIndex];
-        Node<TKey, TValue> leftSibling = childIndex > 0 ? this.Children[childIndex - 1] : null;
-        Node<TKey, TValue> rightSibling = childIndex < this.Children.Count - 1 ? this.Children[childIndex + 1] : null;
+        Console.WriteLine($"Before HandleChildUnderflow - childIndex: {childIndex}");
+        Console.WriteLine($"Children count: {this.Children.Count}");
+        Console.WriteLine($"Entering HandleChildUnderflow - childIndex: {childIndex}");
+
+        Node<TKey, TValue> child = Children[childIndex];
+        Node<TKey, TValue> leftSibling = childIndex > 0 ? Children[childIndex - 1] : null;
+        Node<TKey, TValue> rightSibling = childIndex < Children.Count - 1 ? Children[childIndex + 1] : null;
+        
+        if (this.Children[childIndex] == null) {
+            Console.WriteLine($"Child at index {childIndex} is null");
+        }
+        if (childIndex > 0 && this.Children[childIndex - 1] == null) {
+            Console.WriteLine($"Left sibling at index {childIndex - 1} is null");
+        }
+        if (childIndex < this.Children.Count - 1 && this.Children[childIndex + 1] == null) {
+            Console.WriteLine($"Right sibling at index {childIndex + 1} is null");
+        }
+        
+        // Ensure Children is not null
+        if (Children == null)
+        {
+            Console.WriteLine("Children list is null.");
+            return;
+        }
+
+        // Ensure childIndex is within the valid range
+        if (childIndex < 0 || childIndex >= Children.Count)
+        {
+            Console.WriteLine($"Child index {childIndex} is out of range.");
+            return;
+        }
+
+        // Check if the child and siblings are null
+        if (Children[childIndex] == null)
+        {
+            Console.WriteLine($"Child at index {childIndex} is null");
+        }
+        if (childIndex > 0 && Children[childIndex - 1] == null)
+        {
+            Console.WriteLine($"Left sibling at index {childIndex - 1} is null");
+        }
+        if (childIndex < Children.Count - 1 && Children[childIndex + 1] == null)
+        {
+            Console.WriteLine($"Right sibling at index {childIndex + 1} is null");
+        }
+
 
         if (leftSibling != null && leftSibling.Keys.Count > MinKeys)
         {
+            Console.WriteLine($"Child key count before modification: {this.Children[childIndex].Keys.Count}");
+
             // Borrow from the left sibling
             TKey borrowedKey = leftSibling.Keys.Last();
             leftSibling.Keys.RemoveAt(leftSibling.Keys.Count - 1);
             child.Keys.Insert(0, borrowedKey);
             // Handle value or child pointer borrowing as necessary
+            Console.WriteLine($"After modification - Children count: {this.Children.Count}");
+
         }
         else if (rightSibling != null && rightSibling.Keys.Count > MinKeys)
         {
+            Console.WriteLine($"Child key count before modification: {this.Children[childIndex].Keys.Count}");
             // Borrow from the right sibling
             TKey borrowedKey = rightSibling.Keys.First();
             rightSibling.Keys.RemoveAt(0);
             child.Keys.Add(borrowedKey);
             // Handle value or child pointer borrowing as necessary
+            Console.WriteLine($"After modification - Children count: {this.Children.Count}");
+
         }
         else
         {
