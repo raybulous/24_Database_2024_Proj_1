@@ -3,7 +3,7 @@ using static _24_Database_2024_Proj_1.Constants;
 public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
 {
     private const int LongSize = sizeof(long);
-    public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
+    public static int degree = 4;//(BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
     private Node<TKey, TValue> root;
 
     public BPlusTree()

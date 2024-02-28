@@ -2,7 +2,6 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
 {
     public List<Node<TKey, TValue>> Children { get; private set; }
     private int MinKeys => (int)Math.Floor(BPlusTree<TKey, TValue>.degree / 2.0);
-    public InternalNode<TKey, TValue> Parent { get; set; } // Parent reference
 
 
 
@@ -195,19 +194,6 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
 
             // Merge the children from the sibling node
             this.Children.AddRange(siblingInternalNode.Children);
-
-            // Update parent references for the children being merged, if necessary
-            foreach (var child in siblingInternalNode.Children)
-            {
-                if (child is InternalNode<TKey, TValue> internalChild)
-                {
-                    internalChild.Parent = this; // Assuming each node has a Parent property
-                }
-                else if (child is LeafNode<TKey, TValue> leafChild)
-                {
-                    leafChild.Parent = this; // Similarly, for leaf nodes
-                }
-            }
 
             // Note: After merging, you'll likely need to update the parent node to remove the reference to siblingNode.
             // This might include removing the parentKey from the parent's keys and the siblingNode from the parent's children,
