@@ -3,7 +3,8 @@ using static _24_Database_2024_Proj_1.Constants;
 public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
 {
     private const int LongSize = sizeof(long);
-    public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
+    //Calculate the maximum degree for the max block size
+    public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize); 
     private Node<TKey, TValue> root;
 
     public BPlusTree()
@@ -15,29 +16,17 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     public void Insert(TKey key, TValue value)
     {
         var sibling = root.Insert(key, value);
+        //if insert results in splitting, create a newRoot and add the original root and sibling as children
         if (sibling != null)
         {
             var newRoot = new InternalNode<TKey, TValue>();
             newRoot.Children.Add(root);
             newRoot.Children.Add(sibling);
-            TKey newKey;
-            while (true)
-            {
-                if (sibling.Children.Count > 0 && sibling.Children[0] is InternalNode<TKey, TValue>)
-                {
-                    sibling = (InternalNode<TKey, TValue>)sibling.Children[0];
-                }
-                else
-                {
-                    var leafNode = (LeafNode<TKey, TValue>)sibling.Children[0];
-                    newKey = leafNode.Keys[0];
-                    break;
-                }
-            }
+            TKey newKey = newRoot.GetFirstKey();
             newRoot.Keys.Add(newKey);
             root = newRoot;
         }
-        if (root.IsOverflow) //Check if exceed degree
+        if (root.IsOverflow) //Check for overflow to split 
         {
             var newRoot = new InternalNode<TKey, TValue>(); //new node that will point to the 2 nodes from root.Split
             newRoot.Children.Add(root);
@@ -68,7 +57,6 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
                     }
                 }
 
-                // Print keys in the current node
                 Console.Write("[");
                 for (int j = 0; j < currentNode.Keys.Count; j++)
                 {
@@ -85,19 +73,6 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     public TValue Search(TKey key)
     {
         return root.Search(key);
-    }
-
-    public TValue GetRootValue()
-    {
-        if (root is LeafNode<TKey, TValue> leafNode)
-        {
-            return leafNode.Values.Count > 0 ? leafNode.Values[0] : default(TValue);
-        }
-        else
-        {
-            // Possibly throw an exception or return a default value, since internal nodes do not contain direct values.
-            throw new InvalidOperationException("Root is an internal node and does not contain direct values.");
-        }
     }
 
     public int CountNodes()
@@ -202,19 +177,20 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
 
     public bool Delete(TKey key)
     {
-        // Step 1: Search and delete the key from the leaf node.
+        //Traverse the tree and delete the first instance of the key from the leaf node.
         bool isDeleted = root.Delete(key);
         if (!isDeleted)
         {
             return false; // Key not found.
         }
 
-        // Step 2: Handle underflow from the root node.
-        if (root is InternalNode<TKey, TValue> && root.Keys.Count == 0)
+        //Root node is left with 1 child, that child is set as root instead
+        if (root is InternalNode<TKey, TValue> && root.Keys.Count == 0) 
         {
             // Promote the single child as the new root if root is empty.
             root = ((InternalNode<TKey, TValue>)root).Children[0];
         }
+        //Update keys
         if (root is InternalNode<TKey, TValue> internalRoot)
         {
             for (int i = 0; i < internalRoot.Keys.Count; i++)
