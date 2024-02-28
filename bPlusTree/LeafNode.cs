@@ -2,9 +2,7 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
 {
     public List<TValue> Values { get; private set; }
     public LeafNode<TKey, TValue> Next { get; set; }
-    public List<TKey> Keys { get; set; }
     public InternalNode<TKey, TValue> Parent { get; set; } // Parent reference
-
 
     public LeafNode()
     {
@@ -147,6 +145,27 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
                 this.Parent.Children.RemoveAt(index);
                 this.Parent.Keys.RemoveAt(index - 1); // Adjust parent keys accordingly. Be careful with index bounds.
             }
+        }
+    }
+
+    // Merge method
+    // Merges the current node with the provided siblingNode.
+    // Assumes that siblingNode is to the right of this node and that parentKey is the key from the parent node that divides the two.
+    public override void Merge(Node<TKey, TValue> siblingNode, TKey parentKey)
+    {
+        if (siblingNode is LeafNode<TKey, TValue> siblingLeafNode)
+        {
+            // Merge the keys from the sibling node
+            this.Keys.AddRange(siblingLeafNode.Keys);
+
+            // Merge the children from the sibling node
+            this.Values.AddRange(siblingLeafNode.Values);
+
+            this.Next = siblingLeafNode.Next;
+
+            // Note: After merging, you'll likely need to update the parent node to remove the reference to siblingNode.
+            // This might include removing the parentKey from the parent's keys and the siblingNode from the parent's children,
+            // and potentially triggering further merges or redistributions if the parent now violates B+ tree properties.
         }
     }
     

@@ -3,7 +3,7 @@ using static _24_Database_2024_Proj_1.Constants;
 public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
 {
     private const int LongSize = sizeof(long);
-    public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
+    public static int degree = 4;//(BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
     private Node<TKey, TValue> root;
 
     public BPlusTree()
@@ -15,15 +15,20 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     public void Insert(TKey key, TValue value)
     {
         var sibling = root.Insert(key, value);
-        if(sibling != null){
+        if (sibling != null)
+        {
             var newRoot = new InternalNode<TKey, TValue>();
             newRoot.Children.Add(root);
             newRoot.Children.Add(sibling);
             TKey newKey;
-            while(true){
-                if(sibling.Children.Count > 0 && sibling.Children[0] is InternalNode<TKey, TValue>){
+            while (true)
+            {
+                if (sibling.Children.Count > 0 && sibling.Children[0] is InternalNode<TKey, TValue>)
+                {
                     sibling = (InternalNode<TKey, TValue>)sibling.Children[0];
-                } else {
+                }
+                else
+                {
                     var leafNode = (LeafNode<TKey, TValue>)sibling.Children[0];
                     newKey = leafNode.Keys[0];
                     break;
@@ -194,7 +199,7 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
         CountNodes(root, condition, ref count);
         return count;
     }
-    
+
     public bool Delete(TKey key)
     {
         // Step 1: Search and delete the key from the leaf node.
@@ -210,6 +215,14 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             // Promote the single child as the new root if root is empty.
             root = ((InternalNode<TKey, TValue>)root).Children[0];
         }
+        if (root is InternalNode<TKey, TValue> internalRoot)
+        {
+            for (int i = 0; i < internalRoot.Keys.Count; i++)
+            {
+                internalRoot.Keys[i] = internalRoot.Children[i+1].GetFirstKey();
+            }
+        }
+
         return true;
     }
 

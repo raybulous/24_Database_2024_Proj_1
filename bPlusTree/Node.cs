@@ -9,5 +9,5 @@ public abstract class Node<TKey, TValue> where TKey : IComparable<TKey>
     public abstract bool Delete(TKey key);
     protected int MinKeys => (int)Math.Ceiling(BPlusTree<TKey, TValue>.degree / 2.0) - 1;
     public abstract TKey GetFirstKey();
-
+    public abstract void Merge(Node<TKey, TValue> child, TKey key);
 }
