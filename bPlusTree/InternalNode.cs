@@ -1,7 +1,7 @@
 public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparable<TKey>
 {
     public List<Node<TKey, TValue>> Children { get; private set; }
-    
+
     public InternalNode()
     {
         Keys = new List<TKey>();
@@ -13,10 +13,6 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
     public override InternalNode<TKey, TValue> Insert(TKey key, TValue value)
     {
         int index = FindIndexToInsert(key);
-        if (index == Children.Count)
-        {
-            index--;
-        }
         var newChild = Children[index].Insert(key, value);
         if (newChild != null)
         {
@@ -77,6 +73,10 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         while (index < Keys.Count && key.CompareTo(Keys[index]) >= 0)
         {
             index++;
+        }
+        if (index == Children.Count)
+        {
+            index--;
         }
         return index;
     }
@@ -312,7 +312,7 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
             {
                 for (int j = 0; j < internalNode.Children.Count - 1; j++)
                 {
-                    internalNode.Keys[j] = internalNode.Children[j+1].GetFirstKey();
+                    internalNode.Keys[j] = internalNode.Children[j + 1].GetFirstKey();
                 }
             }
         }
