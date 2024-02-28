@@ -91,26 +91,18 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
     {
         int index = FindChildIndexForKey(key);
         bool isDeleted;
-        do
+        do //try deleting from child node, if not found move to next child 
         {
-            isDeleted = Children[index++].Delete(key);
-        } while (!isDeleted && index < Children.Count);
+            isDeleted = Children[index++].Delete(key); 
+        } while (!isDeleted && index < Children.Count); //TODO: CHECK KEY, IF MORE THAN KEY, TERMINATE (REDUCE UNNECESSARY SEARCHING)
         if (!isDeleted)
         {
             return false; // Key not found
         }
 
-        /*
-        bool isDeleted = Children[index].Delete(key);
-        if (!isDeleted)
-        {
-            return false; // Key not found in any child.
-        }*/
-
-        // Check if child is underflowed and handle it.
+        //Check if child is underflowed and handle it.
         HandleChildUnderflow(index - 1);
 
-        // Remove the key from the parent node if necessary.
         UpdateKeysAfterDeletion();
 
         return true;
@@ -128,25 +120,19 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         return this.Keys.Count - 1;
     }
 
-    // Merge method
-    // Merges the current node with the provided siblingNode.
-    // Assumes that siblingNode is to the right of this node and that parentKey is the key from the parent node that divides the two.
+    //Merges the current node with the provided siblingNode.
     public override void Merge(Node<TKey, TValue> siblingNode, TKey parentKey)
     {
         if (siblingNode is InternalNode<TKey, TValue> siblingInternalNode)
         {
-            // Add the parentKey that was separating the two nodes
+            //Add the parentKey that was separating the two nodes
             this.Keys.Add(parentKey);
 
-            // Merge the keys from the sibling node
+            //Merge the keys from the sibling node
             this.Keys.AddRange(siblingInternalNode.Keys);
 
-            // Merge the children from the sibling node
+            //Merge the children from the sibling node
             this.Children.AddRange(siblingInternalNode.Children);
-
-            // Note: After merging, you'll likely need to update the parent node to remove the reference to siblingNode.
-            // This might include removing the parentKey from the parent's keys and the siblingNode from the parent's children,
-            // and potentially triggering further merges or redistributions if the parent now violates B+ tree properties.
         }
     }
 
@@ -156,29 +142,25 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         Node<TKey, TValue> leftSibling = childIndex > 0 ? Children[childIndex - 1] : null;
         Node<TKey, TValue> rightSibling = childIndex < Children.Count - 1 ? Children[childIndex + 1] : null;
 
+        //left merge with mid
         if (leftSibling != null && ((leftSibling is InternalNode<TKey, TValue> internalLeft && child is InternalNode<TKey, TValue> internalChild && internalLeft.Children.Count + internalChild.Children.Count <= BPlusTree<TKey, TValue>.degree + 1) || (leftSibling is LeafNode<TKey, TValue> leafLeft && child is LeafNode<TKey, TValue> leafChild && leafLeft.Values.Count + leafChild.Values.Count <= BPlusTree<TKey, TValue>.degree)))
         {
-            //if (leftSibling is InternalNode<TKey, TValue> internalLeftSibling && child is InternalNode<TKey, TValue> internalChild)
-            //{
             leftSibling.Merge(child, this.Keys[childIndex - 1]);
             this.Children.RemoveAt(childIndex);
-            this.Keys.RemoveAt(childIndex - 1); // Update keys in this internal node
-            //}
+            this.Keys.RemoveAt(childIndex - 1);
         }
+        //mid merge with right
         else if (rightSibling != null && ((rightSibling is InternalNode<TKey, TValue> internalRight && child is InternalNode<TKey, TValue> internalChild1 && internalRight.Children.Count + internalChild1.Children.Count <= BPlusTree<TKey, TValue>.degree + 1) || (rightSibling is LeafNode<TKey, TValue> leafRight && child is LeafNode<TKey, TValue> leafChild1 && leafRight.Values.Count + leafChild1.Values.Count <= BPlusTree<TKey, TValue>.degree)))
         {
-            //if (rightSibling is InternalNode<TKey, TValue> internalRightSibling && child is InternalNode<TKey, TValue> internalChild)
-            //{
             child.Merge(rightSibling, this.Keys[childIndex]);
             this.Children.RemoveAt(childIndex + 1);
-            this.Keys.RemoveAt(childIndex); // Update keys in this internal node
-            //}
+            this.Keys.RemoveAt(childIndex);
         }
         else
         {
+            //mid borrow key from left
             if (leftSibling != null && leftSibling.Keys.Count > MinKeys() && leftSibling.Keys.Count - child.Keys.Count > 1)
             {
-                // Borrow from the left sibling
                 TKey borrowedKey = leftSibling.Keys.Last();
                 if (leftSibling is InternalNode<TKey, TValue> leftInternal && child is InternalNode<TKey, TValue> childInternal)
                 {
@@ -195,9 +177,9 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
                 leftSibling.Keys.RemoveAt(leftSibling.Keys.Count - 1);
                 child.Keys.Insert(0, borrowedKey);
             }
+            //mid borrow key from right
             else if (rightSibling != null && rightSibling.Keys.Count > MinKeys() && rightSibling.Keys.Count - child.Keys.Count > 1)
             {
-                // Borrow from the right sibling
                 TKey borrowedKey = rightSibling.Keys.First();
                 if (rightSibling is InternalNode<TKey, TValue> rightInternal && child is InternalNode<TKey, TValue> childInternal)
                 {
@@ -215,45 +197,6 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
                 child.Keys.Add(borrowedKey);
             }
         }
-        /*
-        if (leftSibling != null && leftSibling.Keys.Count > MinKeys && leftSibling.Keys.Count - child.Keys.Count > 1)
-        {
-            // Borrow from the left sibling
-            TKey borrowedKey = leftSibling.Keys.Last();
-            leftSibling.Keys.RemoveAt(leftSibling.Keys.Count - 1);
-            child.Keys.Insert(0, borrowedKey);
-        }
-        else if (rightSibling != null && rightSibling.Keys.Count > MinKeys && rightSibling.Keys.Count - child.Keys.Count > 1)
-        {
-            // Borrow from the right sibling
-            TKey borrowedKey = rightSibling.Keys.First();
-            rightSibling.Keys.RemoveAt(0);
-            child.Keys.Add(borrowedKey);
-        }
-        else
-        {
-            // Merge child with a sibling (prefer left if possible)
-            if (leftSibling != null && leftSibling is InternalNode<TKey, TValue> internalLeftSibling && leftSibling.Keys.Count + child.Keys.Count <= BPlusTree<TKey, TValue>.degree)
-            {
-                // Ensure child is also an InternalNode before merging
-                if (child is InternalNode<TKey, TValue> internalChild)
-                {
-                    internalLeftSibling.Merge(internalChild, this.Keys[childIndex - 1]);
-                    this.Children.RemoveAt(childIndex);
-                    this.Keys.RemoveAt(childIndex - 1); // Update keys in this internal node
-                }
-            }
-            else if (rightSibling != null && rightSibling is InternalNode<TKey, TValue> internalRightSibling && rightSibling.Keys.Count + child.Keys.Count <= BPlusTree<TKey, TValue>.degree)
-            {
-                // Ensure child is also an InternalNode before merging
-                if (child is InternalNode<TKey, TValue> internalChild)
-                {
-                    internalChild.Merge(internalRightSibling, this.Keys[childIndex]);
-                    this.Children.RemoveAt(childIndex + 1);
-                    this.Keys.RemoveAt(childIndex); // Update keys in this internal node
-                }
-            }
-        }*/
     }
 
     protected void UpdateKeysAfterDeletion()
@@ -268,24 +211,15 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
                 }
             }
         }
-        /*
-        for (int i = 0; i < this.Children.Count - 1; i++)
-        {
-            this.Keys[i] = this.Children[i + 1].GetFirstKey();
-        }*/
     }
 
-    public override TKey GetFirstKey()
+    public override TKey GetFirstKey() //traverse down to Children[0] and LeafNode will return first key
     {
-        if (this.Children == null || this.Children.Count == 0)
-        {
-            throw new InvalidOperationException("Cannot get first key from an empty internal node.");
-        }
         var child = this.Children[0];
         return child.GetFirstKey();
     }
 
-    protected override int MinKeys()
+    protected override int MinKeys() //Calculate the minimum key given the b+ tree degree
     {
         return (int)Math.Floor(BPlusTree<TKey, TValue>.degree / 2.0);
     }
