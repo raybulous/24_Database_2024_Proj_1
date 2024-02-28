@@ -13,15 +13,17 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
     public override InternalNode<TKey, TValue> Insert(TKey key, TValue value)
     {
         int index = FindIndexToInsert(key);
-        var newChild = Children[index].Insert(key, value);
+        var newChild = Children[index].Insert(key, value); //pass the key to insert to the child node
+        //gets a newChild if the insert lead to overflow and spliting was done
         if (newChild != null)
         {
-            Children.Insert(index + 1, newChild);
-            if (Children.Count == Keys.Count + 2 && !IsOverflow)
+            Children.Insert(index + 1, newChild); //Add the newChild to the Children list
+            if (Children.Count == Keys.Count + 2 && !IsOverflow) //Add a key if required and won't lead to overflow
             {
-                Keys.Insert(index, FindKeyValue(newChild));
+                Keys.Insert(index, newChild.GetFirstKey());
             }
         }
+        //split the the Child if overflow
         if (Children[index].IsOverflow)
         {
             var sibling = Children[index].Split(this, index);
@@ -47,21 +49,25 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         int keyCount = Keys.Count;
         int childrenCount = Children.Count;
         int temp = (int)Math.Ceiling((double)keyCount / 2);
-        newNode.Keys.AddRange(Keys.GetRange(keyCount - degree / 2, degree / 2));
+        //newNode gets the second half of the keys and their corresponding children
+        newNode.Keys.AddRange(Keys.GetRange(keyCount - degree / 2, degree / 2)); 
         newNode.Children.AddRange(Children.GetRange(childrenCount - childrenCount / 2, childrenCount / 2));
+        //original removes key and children added to newNode
         Keys.RemoveRange(keyCount - temp, temp);
         Children.RemoveRange(childrenCount - childrenCount / 2, childrenCount / 2);
-        TKey newKey = FindKeyValue(newNode);
+        //Include the newNode into the parent's key and childrean list
+        TKey newKey = newNode.GetFirstKey();
         parent.Keys.Insert(index, newKey);
         parent.Children.Insert(index + 1, newNode);
+        //Update keys 
         for (int i = 0; i < Keys.Count; i++)
         {
-            newKey = FindKeyValue(Children[i + 1]);
+            newKey = Children[i+1].GetFirstKey();
             Keys[i] = newKey;
         }
         for (int i = 0; i < parent.Keys.Count; i++)
         {
-            newKey = FindKeyValue(parent.Children[i + 1]);
+            newKey = parent.Children[i+1].GetFirstKey();
             parent.Keys[i] = newKey;
         }
         return null;
@@ -80,60 +86,6 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         }
         return index;
     }
-
-    private TKey FindKeyValue(Node<TKey, TValue> inputNode)
-    {
-        // Initialize a variable to hold the key. Assuming default(TKey) is a valid default for your key type.
-        TKey key = default(TKey);
-
-        // Check if the inputNode is an InternalNode.
-        if (inputNode is InternalNode<TKey, TValue> internalNode)
-        {
-            // We need to find the left-most leaf node starting from this internal node.
-            Node<TKey, TValue> currentNode = internalNode;
-            while (currentNode != null)
-            {
-                if (currentNode is LeafNode<TKey, TValue> leafNode)
-                {
-                    // If the current node is a LeafNode, we take its first key.
-                    if (leafNode.Keys.Count > 0)
-                    {
-                        key = leafNode.Keys[0];
-                        break;
-                    }
-                }
-                else if (currentNode is InternalNode<TKey, TValue> currentInternalNode)
-                {
-                    // If the current node is an InternalNode, we go down to its first child.
-                    if (currentInternalNode.Children.Count > 0)
-                    {
-                        currentNode = currentInternalNode.Children[0];
-                    }
-                    else
-                    {
-                        // This should not happen in a well-formed B+ tree, but it's good to handle the case.
-                        break;
-                    }
-                }
-                else
-                {
-                    // If for some reason the node type is unknown, break the loop.
-                    break;
-                }
-            }
-        }
-        else if (inputNode is LeafNode<TKey, TValue> leafNode)
-        {
-            // If the input node is directly a LeafNode, we simply take its first key.
-            if (leafNode.Keys.Count > 0)
-            {
-                key = leafNode.Keys[0];
-            }
-        }
-
-        return key;
-    }
-
 
     public override bool Delete(TKey key)
     {
