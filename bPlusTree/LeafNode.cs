@@ -171,12 +171,12 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
     
     protected void HandleUnderflow()
     {
-        if (this.Keys.Count >= this.MinKeys) return; // No underflow
+        if (this.Keys.Count >= MinKeys()) return; // No underflow
 
         LeafNode<TKey, TValue> leftSibling = this.GetLeftSibling();
         LeafNode<TKey, TValue> rightSibling = this.GetRightSibling();
 
-        if (leftSibling != null && leftSibling.Keys.Count > this.MinKeys)
+        if (leftSibling != null && leftSibling.Keys.Count > MinKeys())
         {
             // Borrow from left
             TKey borrowedKey = leftSibling.Keys.Last();
@@ -187,7 +187,7 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
             this.Values.Insert(0, borrowedValue);
             this.UpdateParentKey(borrowedKey, this.Keys[0]);
         }
-        else if (rightSibling != null && rightSibling.Keys.Count > this.MinKeys)
+        else if (rightSibling != null && rightSibling.Keys.Count > MinKeys())
         {
             // Borrow from right
             TKey borrowedKey = rightSibling.Keys.First();
@@ -273,5 +273,9 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
         }
     
         return key;
+    }
+    protected override int MinKeys()
+    {
+        return (int)Math.Ceiling(BPlusTree<TKey, TValue>.degree / 2.0) - 1;
     }
 }

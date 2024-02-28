@@ -1,10 +1,7 @@
 public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparable<TKey>
 {
     public List<Node<TKey, TValue>> Children { get; private set; }
-    private int MinKeys => (int)Math.Floor(BPlusTree<TKey, TValue>.degree / 2.0);
-
-
-
+    
     public InternalNode()
     {
         Keys = new List<TKey>();
@@ -171,7 +168,7 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
     {
         for (int i = 0; i < this.Keys.Count; i++)
         {
-            if (key.CompareTo(this.Keys[i]) < 0)
+            if (key.CompareTo(this.Keys[i]) <= 0)
             {
                 return i - 1 < 0 ? 0 : i - 1; //return previous child in case of duplicate leaking to previous child
             }
@@ -227,7 +224,7 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         }
         else
         {
-            if (leftSibling != null && leftSibling.Keys.Count > MinKeys && leftSibling.Keys.Count - child.Keys.Count > 1)
+            if (leftSibling != null && leftSibling.Keys.Count > MinKeys() && leftSibling.Keys.Count - child.Keys.Count > 1)
             {
                 // Borrow from the left sibling
                 TKey borrowedKey = leftSibling.Keys.Last();
@@ -246,7 +243,7 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
                 leftSibling.Keys.RemoveAt(leftSibling.Keys.Count - 1);
                 child.Keys.Insert(0, borrowedKey);
             }
-            else if (rightSibling != null && rightSibling.Keys.Count > MinKeys && rightSibling.Keys.Count - child.Keys.Count > 1)
+            else if (rightSibling != null && rightSibling.Keys.Count > MinKeys() && rightSibling.Keys.Count - child.Keys.Count > 1)
             {
                 // Borrow from the right sibling
                 TKey borrowedKey = rightSibling.Keys.First();
@@ -334,5 +331,10 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         }
         var child = this.Children[0];
         return child.GetFirstKey();
+    }
+
+    protected override int MinKeys()
+    {
+        return (int)Math.Floor(BPlusTree<TKey, TValue>.degree / 2.0);
     }
 }
