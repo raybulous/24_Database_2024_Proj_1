@@ -22,7 +22,7 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
             var newRoot = new InternalNode<TKey, TValue>();
             newRoot.Children.Add(root);
             newRoot.Children.Add(sibling);
-            TKey newKey = newRoot.GetFirstKey();
+            TKey newKey = sibling.GetFirstKey();
             newRoot.Keys.Add(newKey);
             root = newRoot;
         }
