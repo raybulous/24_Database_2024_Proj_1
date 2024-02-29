@@ -54,7 +54,7 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
         //Update each node to point to the correct next leafNode
         newNode.Next = Next;
         Next = newNode;
-        if (parent.Keys.Count != degree || index == 0 || index == degree - 1) //Add a Key if necessary
+        if (parent.Keys.Count != degree) //Add a Key if necessary
         {
             parent.Keys.Insert(index, newNode.Keys[0]);
         }
