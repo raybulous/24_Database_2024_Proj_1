@@ -28,7 +28,7 @@ public unsafe class Disk
             return (long)p;
         }
     }
-    
+
     public List<long> GetBytePositions(List<long> addresses, long baseAddress)
     {
         List<long> relativeOffsets = addresses.Select(address => address - baseAddress).ToList();
@@ -67,7 +67,7 @@ public unsafe class Disk
         }
         return records;
     }
-    
+
     public List<byte[]> test(long position)
     {
         List<byte[]> records = new List<byte[]>();
@@ -90,7 +90,7 @@ public unsafe class Disk
             for (int recordIndex = 0; recordIndex < recordsPerBlock; recordIndex++)
             {
                 long position = (long)blockIndex * _blockSize + (long)recordIndex * recordSize;
-                if (position + recordSize > _disk.Length) 
+                if (position + recordSize > _disk.Length)
                     break; // Avoid reading beyond the disk
 
                 byte[] recordBytes = new byte[recordSize];
@@ -104,6 +104,36 @@ public unsafe class Disk
         }
 
         return matchingRecords;
+    }
+
+    public int BruteForceDelete(Func<byte[], bool> matchesCondition)
+    {
+        int numberOfBlocks = _disk.Length / _blockSize;
+        int recordsPerBlock = _blockSize / recordSize;
+        int recordsDeleted = 0;
+        int blocksAccessed = 0;
+
+        for (int blockIndex = 0; blockIndex < numberOfBlocks; blockIndex++)
+        {
+            Block block = ReadBlock(blockIndex);
+            blocksAccessed++;
+            for (int recordIndex = 0; recordIndex < recordsPerBlock; recordIndex++)
+            {
+                long position = (long)recordIndex * recordSize;
+                byte[] recordBytes = new byte[recordSize];
+                Array.Copy(block.Data, position, recordBytes, 0, recordSize);
+
+                if (matchesCondition(recordBytes))
+                {
+                    recordsDeleted++;
+                    Array.Fill(recordBytes, (byte)0); //Empty record
+                    Array.Copy(recordBytes, 0, block.Data, position, recordSize); //write to block
+                }
+            }
+            WriteBlock(blockIndex, block); //rewrite back to block;
+        }
+        return blocksAccessed;
+        //return recordsDeleted;
     }
 
     /*
