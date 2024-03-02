@@ -55,7 +55,7 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         //original removes key and children added to newNode
         Keys.RemoveRange(keyCount - temp, temp);
         Children.RemoveRange(childrenCount - childrenCount / 2, childrenCount / 2);
-        //Include the newNode into the parent's key and childrean list
+        //Include the newNode into the parent's key and children list
         TKey newKey = newNode.GetFirstKey();
         parent.Keys.Insert(index, newKey);
         parent.Children.Insert(index + 1, newNode);
