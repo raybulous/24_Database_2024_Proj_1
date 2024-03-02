@@ -1,10 +1,11 @@
+using System.Globalization;
 using static _24_Database_2024_Proj_1.Constants;
 
 public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
 {
     private const int LongSize = sizeof(long);
     //Calculate the maximum degree for the max block size
-    public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize); 
+    public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
     private Node<TKey, TValue> root;
 
     public BPlusTree()
@@ -137,42 +138,61 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     }
 
     // Method to retrieve values that meet a specific condition on keys
-    public List<TValue> RetrieveValuesMeetingCondition(Func<TKey, bool> condition)
+    public (List<TKey> matchingKeys, int numberOfNodesAccessed) RetrieveValuesMeetingCondition(Func<TKey, bool> condition, TKey minValue)
     {
-        List<TValue> matchingValues = new List<TValue>();
-        TraverseAndCollect(root, condition, matchingValues);
-        return matchingValues;
-    }
-
-    // Helper method to traverse the tree and collect values
-    private void TraverseAndCollect(Node<TKey, TValue> node, Func<TKey, bool> condition, List<TValue> matchingValues)
-    {
-        if (node is LeafNode<TKey, TValue> leaf)
+        int numberOfNodesAccessed = 1; //root is 1 
+        List<TKey> matchingKeys = new List<TKey>();
+        Node<TKey, TValue> currNode = root;
+        bool failedCondition = false;
+        bool enteredFlag = false;
+        while (!failedCondition)
         {
-            // Leaf node, check each key against the condition
-            for (int i = 0; i < leaf.Keys.Count; i++)
+            if (currNode is InternalNode<TKey, TValue> internalNode)
             {
-                if (condition(leaf.Keys[i]))
+                int index = 0;
+                while (index < internalNode.Keys.Count && minValue.CompareTo(internalNode.Keys[index]) > 0)
                 {
-                    matchingValues.Add(leaf.Values[i]);
+                    index++;
+                };
+                numberOfNodesAccessed++;
+                currNode = internalNode.Children[index];
+            }
+            else if (currNode is LeafNode<TKey, TValue> leafNode)
+            {
+                int index = 0;
+                while (!failedCondition)
+                {
+                    if (index == leafNode.Keys.Count)
+                    {
+                        numberOfNodesAccessed++;
+                        leafNode = leafNode.Next;
+                        if(leafNode == null){
+                            failedCondition = true;
+                            break;
+                        }
+                        index = 0;
+                    }
+                    while (condition(leafNode.Keys[index]))
+                    {
+                        enteredFlag = true;
+                        matchingKeys.Add(leafNode.Keys[index]);
+                        index++;
+                        if (index == leafNode.Keys.Count)
+                        {
+                            numberOfNodesAccessed++;
+                            leafNode = leafNode.Next;
+                            index = 0;
+                        }
+                    }
+                    if (enteredFlag)
+                    {
+                        failedCondition = true;
+                    }
+                    index++;
                 }
             }
         }
-        else if (node is InternalNode<TKey, TValue> internalNode)
-        {
-            // Internal node, recursively traverse child nodes
-            foreach (var child in internalNode.Children)
-            {
-                TraverseAndCollect(child, condition, matchingValues);
-            }
-        }
-    }
-
-    public int CountIndexNodesAccessed(Func<TKey, bool> condition)
-    {
-        int count = 0;
-        CountNodes(root, condition, ref count);
-        return count;
+        return (matchingKeys, numberOfNodesAccessed);
     }
 
     public bool Delete(TKey key)
@@ -185,7 +205,7 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
         }
 
         //Root node is left with 1 child, that child is set as root instead
-        if (root is InternalNode<TKey, TValue> && root.Keys.Count == 0) 
+        if (root is InternalNode<TKey, TValue> && root.Keys.Count == 0)
         {
             // Promote the single child as the new root if root is empty.
             root = ((InternalNode<TKey, TValue>)root).Children[0];
@@ -195,32 +215,10 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
         {
             for (int i = 0; i < internalRoot.Keys.Count; i++)
             {
-                internalRoot.Keys[i] = internalRoot.Children[i+1].GetFirstKey();
+                internalRoot.Keys[i] = internalRoot.Children[i + 1].GetFirstKey();
             }
         }
 
         return true;
-    }
-
-    // Helper method to count index nodes accessed during traversal
-    private void CountNodes(Node<TKey, TValue> node, Func<TKey, bool> condition, ref int count)
-    {
-        if (node is InternalNode<TKey, TValue>)
-        {
-            count++; // Counting this node as accessed
-            InternalNode<TKey, TValue> internalNode = (InternalNode<TKey, TValue>)node;
-            foreach (var child in internalNode.Children)
-            {
-                CountNodes(child, condition, ref count);
-            }
-        }
-        else if (node is LeafNode<TKey, TValue> leaf)
-        {
-            // Optionally, count leaf nodes if they match the condition
-            if (leaf.Keys.Exists(k => condition(k)))
-            {
-                count++;
-            }
-        }
     }
 }

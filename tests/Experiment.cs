@@ -1,10 +1,7 @@
-using System.Text;
-
 namespace _24_Database_2024_Proj_1;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System;
-using System.Runtime.CompilerServices;
 
 class Experiment
 {
@@ -74,7 +71,6 @@ class Experiment
         Console.WriteLine("Experiment 2");
         int recordsAdded = 0;
 
-
         for (int i = 0; i < numOfBlocks; i++)
         { //loop through datas
             Block block = storage.ReadBlock(i);
@@ -108,27 +104,27 @@ class Experiment
         Console.WriteLine("Experiment 3");
         // Start timing the retrieval process
         stopwatch.Restart();
-        List<long> recordPositions = bTree.RetrieveValuesMeetingCondition(key => key == 500);
+
+        var result = bTree.RetrieveValuesMeetingCondition(key => key == 500, 500);
         stopwatch.Stop();
+        List<int> matchingKeys = result.matchingKeys;
+        int numberOfNodesAccessed = result.numberOfNodesAccessed;
+
         long retrievalTime = stopwatch.ElapsedMilliseconds;
         long baseAddress = storage.GetArrayAddress(0);
         // Calculate the average of AvgRating
-        if (recordPositions.Count > 0)
+        if (matchingKeys.Count > 0)
         {
-            List<long> addressList = storage.GetBytePositions(recordPositions, baseAddress);
-            var records = storage.FetchRecordsFromPositions(addressList);
-            foreach (var recordBytes in records)
+            foreach (var key in matchingKeys)
             {
-                double extractedRating = Record.ExtractAverageRating(recordBytes);
-                double roundedRating = Math.Round(extractedRating, 1);
-                aveRating += roundedRating;
+                aveRating += key;
             }
-            aveRating /= records.Count; // Calculate the average rating
+            aveRating /= matchingKeys.Count; // Calculate the average rating
         }
 
         Console.WriteLine("::B+ Tree Retrieval::");
-        Console.WriteLine($"Number of index nodes accessed: {bTree.CountIndexNodesAccessed(key => key == 500)}");
-        Console.WriteLine($"Total records found:: {recordPositions.Count}");
+        Console.WriteLine($"Number of index nodes accessed: {numberOfNodesAccessed}");
+        Console.WriteLine($"Total records found:: {matchingKeys.Count}");
         Console.WriteLine($"Average of averageRating's: {aveRating}");
         Console.WriteLine($"Running time of the retrieval process: {retrievalTime} ms");
 
@@ -179,28 +175,27 @@ class Experiment
 
         // Start timing the retrieval process for B+ Tree
         stopwatch.Restart();
-        var recordPositions = bTree.RetrieveValuesMeetingCondition(key => key >= 30000 && key <= 40000);
+        var result = bTree.RetrieveValuesMeetingCondition(key => key >= 30000 && key <= 40000, 30000);
         stopwatch.Stop();
+        List<int> matchingKeys = result.matchingKeys;
+        int numberOfNodesAccessed = result.numberOfNodesAccessed;
+
         long retrievalTime = stopwatch.ElapsedMilliseconds;
         long baseAddress = storage.GetArrayAddress(0);
         // Calculate the average of AvgRating
-        if (recordPositions.Count > 0)
+        if (matchingKeys.Count > 0)
         {
-            totalRecords = recordPositions.Count;
-            List<long> addressList = storage.GetBytePositions(recordPositions, baseAddress);
-            var records = storage.FetchRecordsFromPositions(addressList);
-            foreach (var recordBytes in records)
+            totalRecords = matchingKeys.Count;
+            foreach (int key in matchingKeys)
             {
-                double extractedRating = Record.ExtractAverageRating(recordBytes);
-                double roundedRating = Math.Round(extractedRating, 1);
-                aveRating += roundedRating;
+                aveRating += key;
             }
-            aveRating /= records.Count; // Calculate the average rating
+            aveRating /= matchingKeys.Count; // Calculate the average rating
         }
 
         Console.WriteLine("::B+ Tree Retrieval::");
-        Console.WriteLine($"Number of index nodes accessed: {bTree.CountIndexNodesAccessed(key => key >= 30000 && key <= 40000)}");
-        Console.WriteLine($"Number of data blocks accessed: {recordPositions.Count}");
+        Console.WriteLine($"Number of index nodes accessed: {numberOfNodesAccessed}");
+        Console.WriteLine($"Number of data blocks accessed: {matchingKeys.Count}");
         Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
         Console.WriteLine($"Running time of the retrieval process: {retrievalTime} ms");
         Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation
@@ -248,10 +243,11 @@ class Experiment
         stopwatch.Restart();
         int count = 0;
         bool foundKey;
-        do{
+        do
+        {
             foundKey = bTree.Delete(1000);
             count++;
-        }while(foundKey);
+        } while (foundKey);
         stopwatch.Stop();
         long deletionTime = stopwatch.ElapsedMilliseconds;
 
@@ -263,7 +259,7 @@ class Experiment
         }
 
         Console.WriteLine("::B+ Tree Delete::");
-        Console.WriteLine($"Number of records deleted: {count-1}");
+        Console.WriteLine($"Number of records deleted: {count - 1}");
         Console.WriteLine($"The number of nodes of the B+ tree: {bTree.CountNodes()}");
         Console.WriteLine($"The number of levels of the B + tree: {bTree.CountLevels()}");
         Console.WriteLine($"the content of the root node(only the keys): {rootKeysString}");
