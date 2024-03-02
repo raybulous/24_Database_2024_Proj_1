@@ -163,6 +163,7 @@ class Experiment
         Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
         Console.WriteLine($"Average of averageRating's: {aveRating}");
         Console.WriteLine($"Total records found: {totalRecords}");
+        Console.WriteLine();
     }
 
     public void runExp4()
@@ -230,11 +231,13 @@ class Experiment
         // Assuming each block is fully utilized for simplicity, calculate average rating and blocks accessed
         int bruteForceDataBlocksAccessed = matchingRecords.Count > 0 ? (int)Math.Ceiling((double)matchingRecords.Count / Constants.BlockConstants.MaxRecordsPerBlock) : 0;
 
+        Console.WriteLine();
         Console.WriteLine("::Brute-Force Scan::");
         Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceDataBlocksAccessed}");
         Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
         Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
         Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation
+        Console.WriteLine();
     }
 
     public void runExp5()
