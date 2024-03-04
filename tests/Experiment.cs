@@ -134,7 +134,7 @@ class Experiment
 
         // Brute-force linear scan
         stopwatch.Restart();
-        var matchingRecords = storage.BruteForceScan(recordBytes =>
+        var bruteForceResult = storage.BruteForceScan(recordBytes =>
         {
             return Record.ExtractNumVotes(recordBytes) == 500;
         });
@@ -142,24 +142,21 @@ class Experiment
         long bruteForceTime = stopwatch.ElapsedMilliseconds;
 
         // Calculate the average rating from matching records using brute-force linear scan
-        if (matchingRecords.Count > 0)
+        if (bruteForceResult.matchingRecords.Count > 0)
         {
-            foreach (var recordBytes in matchingRecords)
+            foreach (var recordBytes in bruteForceResult.matchingRecords)
             {
                 double extractedRating = Record.ExtractAverageRating(recordBytes);
                 double roundedRating = Math.Round(extractedRating, 1);
                 aveRating += roundedRating;
             }
-            aveRating /= matchingRecords.Count;
-            totalRecords = matchingRecords.Count;
+            aveRating /= bruteForceResult.matchingRecords.Count;
+            totalRecords = bruteForceResult.matchingRecords.Count;
         }
-
-        // Assuming each block is fully utilized for simplicity
-        int bruteForceDataBlocksAccessed = matchingRecords.Count > 0 ? (int)Math.Ceiling((double)matchingRecords.Count / Constants.BlockConstants.MaxRecordsPerBlock) : 0;
 
         // Display the statistics
         Console.WriteLine("::Brute-Force Scan::");
-        Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceDataBlocksAccessed}");
+        Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceResult.blocksAccessed}");
         Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
         Console.WriteLine($"Average of averageRating's: {aveRating}");
         Console.WriteLine($"Total records found: {totalRecords}");
@@ -207,7 +204,7 @@ class Experiment
 
         // Brute-force linear scan
         stopwatch.Restart();
-        var matchingRecords = storage.BruteForceScan(recordBytes =>
+        var bruteForceResult = storage.BruteForceScan(recordBytes =>
         {
             int numVotes = Record.ExtractNumVotes(recordBytes);
             return numVotes >= 30000 && numVotes <= 40000;
@@ -216,24 +213,21 @@ class Experiment
         long bruteForceTime = stopwatch.ElapsedMilliseconds;
 
         // Calculate the average of AvgRating
-        if (matchingRecords.Count > 0)
+        if (bruteForceResult.matchingRecords.Count > 0)
         {
-            foreach (var recordBytes in matchingRecords)
+            foreach (var recordBytes in bruteForceResult.matchingRecords)
             {
                 double extractedRating = Record.ExtractAverageRating(recordBytes);
                 double roundedRating = Math.Round(extractedRating, 1);
                 aveRating += roundedRating;
             }
-            aveRating /= matchingRecords.Count;
-            totalRecords = matchingRecords.Count;
+            aveRating /= bruteForceResult.matchingRecords.Count;
+            totalRecords = bruteForceResult.matchingRecords.Count;
         }
-
-        // Assuming each block is fully utilized for simplicity, calculate average rating and blocks accessed
-        int bruteForceDataBlocksAccessed = matchingRecords.Count > 0 ? (int)Math.Ceiling((double)matchingRecords.Count / Constants.BlockConstants.MaxRecordsPerBlock) : 0;
 
         Console.WriteLine();
         Console.WriteLine("::Brute-Force Scan::");
-        Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceDataBlocksAccessed}");
+        Console.WriteLine($"Brute-Force Data Blocks Accessed: {bruteForceResult.blocksAccessed}");
         Console.WriteLine($"Brute-Force Scan Running Time: {bruteForceTime} ms");
         Console.WriteLine($"Average of averageRating's: {aveRating}"); // Implement calculation
         Console.WriteLine($"Total records found: {totalRecords}"); // Implement calculation

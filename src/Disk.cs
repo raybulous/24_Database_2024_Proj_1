@@ -79,22 +79,22 @@ public unsafe class Disk
 
 
 
-    public List<byte[]> BruteForceScan(Func<byte[], bool> matchesCondition)
+    public (List<byte[]> matchingRecords, int blocksAccessed) BruteForceScan(Func<byte[], bool> matchesCondition)
     {
         List<byte[]> matchingRecords = new List<byte[]>();
         int numberOfBlocks = _disk.Length / _blockSize;
         int recordsPerBlock = _blockSize / recordSize;
+        int blocksAccessed = 0;
 
         for (int blockIndex = 0; blockIndex < numberOfBlocks; blockIndex++)
         {
+            Block block = ReadBlock(blockIndex);
+            blocksAccessed++;
             for (int recordIndex = 0; recordIndex < recordsPerBlock; recordIndex++)
             {
-                long position = (long)blockIndex * _blockSize + (long)recordIndex * recordSize;
-                if (position + recordSize > _disk.Length)
-                    break; // Avoid reading beyond the disk
-
+                long position = (long)recordIndex * recordSize;
                 byte[] recordBytes = new byte[recordSize];
-                Array.Copy(_disk, position, recordBytes, 0, recordSize);
+                Array.Copy(block.Data, position, recordBytes, 0, recordSize);
 
                 if (matchesCondition(recordBytes))
                 {
@@ -103,7 +103,7 @@ public unsafe class Disk
             }
         }
 
-        return matchingRecords;
+        return (matchingRecords, blocksAccessed);
     }
 
     public int BruteForceDelete(Func<byte[], bool> matchesCondition)
