@@ -8,7 +8,6 @@ public class Constants
         public const int TConstLength = 10;
         public const int FloatSize = sizeof(float);
         public const int IntSize = sizeof(int);
-        
         private static Record _record = new Record("tt9999999", 5.6f, 164151);
         public static double RecordSize = CalculateRecordSize(_record); // Potential overheads but shldnt be an issue
 
