@@ -98,7 +98,7 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         do //try deleting from child node, if not found move to next child 
         {
             isDeleted = Children[index++].Delete(key);
-        } while (!isDeleted && index < Children.Count); //TODO: CHECK KEY, IF MORE THAN KEY, TERMINATE (REDUCE UNNECESSARY SEARCHING)
+        } while (!isDeleted && index < Children.Count);
         if (!isDeleted)
         {
             return false; // Key not found
