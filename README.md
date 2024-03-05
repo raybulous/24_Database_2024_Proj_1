@@ -10,6 +10,6 @@ This repository contains our implementation of a database management system, whi
 
 ## Running the Code
 To run the project, open your terminal  and execute the following command:
-''' 
+```
 dotnet run
-'''
+```
