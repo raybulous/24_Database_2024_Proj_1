@@ -112,25 +112,27 @@ class Experiment
         // Start timing the retrieval process
         _stopwatch.Restart();
 
-        var result = _bTree.RetrieveValuesMeetingCondition(key => key == 500, 500);
+        var result = _bTree.RetrieveValuesMeetingCondition(key => key == 500, 500, ref _storage);
         _stopwatch.Stop();
-        List<int> matchingKeys = result.matchingKeys;
+        List<byte[]> matchingRecords = result.matchingRecords;
         int numberOfNodesAccessed = result.numberOfNodesAccessed;
 
         double retrievalTime = _stopwatch.Elapsed.Microseconds;
         // Calculate the average of AvgRating
-        if (matchingKeys.Count > 0)
+        if (matchingRecords.Count > 0)
         {
-            foreach (var key in matchingKeys)
+            foreach (var record in matchingRecords)
             {
-                _aveRating += key;
+                double extractedRating = Record.ExtractAverageRating(record);
+                double roundedRating = Math.Round(extractedRating, 1);
+                _aveRating += roundedRating;
             }
-            _aveRating /= matchingKeys.Count; // Calculate the average rating
+            _aveRating /= matchingRecords.Count; // Calculate the average rating
         }
 
         Console.WriteLine("::B+ Tree Retrieval::");
         Console.WriteLine($"Number of index nodes accessed: {numberOfNodesAccessed}");
-        Console.WriteLine($"Total records found:: {matchingKeys.Count}");
+        Console.WriteLine($"Total records found:: {matchingRecords.Count}");
         Console.WriteLine($"Average of averageRating's: {_aveRating}");
         Console.WriteLine($"Running time of the retrieval process: {retrievalTime/1000} ms");
 
@@ -179,26 +181,28 @@ class Experiment
 
         // Start timing the retrieval process for B+ Tree
         _stopwatch.Restart();
-        var result = _bTree.RetrieveValuesMeetingCondition(key => key >= 30000 && key <= 40000, 30000);
+        var result = _bTree.RetrieveValuesMeetingCondition(key => key >= 30000 && key <= 40000, 30000, ref _storage);
         _stopwatch.Stop();
-        List<int> matchingKeys = result.matchingKeys;
+        List<byte[]> matchingRecords = result.matchingRecords;
         int numberOfNodesAccessed = result.numberOfNodesAccessed;
 
         double retrievalTime = _stopwatch.Elapsed.Microseconds;
         // Calculate the average of AvgRating
-        if (matchingKeys.Count > 0)
+        if (matchingRecords.Count > 0)
         {
-            _totalRecords = matchingKeys.Count;
-            foreach (int key in matchingKeys)
+            _totalRecords = matchingRecords.Count;
+            foreach (var record in matchingRecords)
             {
-                _aveRating += key;
+                double extractedRating = Record.ExtractAverageRating(record);
+                double roundedRating = Math.Round(extractedRating, 1);
+                _aveRating += roundedRating;
             }
-            _aveRating /= matchingKeys.Count; // Calculate the average rating
+            _aveRating /= matchingRecords.Count; // Calculate the average rating
         }
 
         Console.WriteLine("::B+ Tree Retrieval::");
         Console.WriteLine($"Number of index nodes accessed: {numberOfNodesAccessed}");
-        Console.WriteLine($"Number of data blocks accessed: {matchingKeys.Count}");
+        Console.WriteLine($"Number of data blocks accessed: {matchingRecords.Count}");
         Console.WriteLine($"Average of averageRating's: {_aveRating}"); // Implement calculation
         Console.WriteLine($"Running time of the retrieval process: {retrievalTime/1000} ms");
         Console.WriteLine($"Total records found: {_totalRecords}"); // Implement calculation

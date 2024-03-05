@@ -1,4 +1,5 @@
 using System.Globalization;
+using _24_Database_2024_Proj_1;
 using static _24_Database_2024_Proj_1.Constants;
 
 public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
@@ -6,6 +7,7 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     private const int LongSize = sizeof(long);
     //Calculate the maximum degree for the max block size
     public static int degree = (BlockConstants.MaxBlockSizeBytes - LongSize) / (LongSize + RecordConstants.IntSize);
+    private int recordSize = RecordConstants.TConstLength + RecordConstants.FloatSize + RecordConstants.IntSize;
     private Node<TKey, TValue> root;
 
     public BPlusTree()
@@ -138,10 +140,10 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
     }
 
     // Method to retrieve values that meet a specific condition on keys
-    public (List<TKey> matchingKeys, int numberOfNodesAccessed) RetrieveValuesMeetingCondition(Func<TKey, bool> condition, TKey minValue)
+    public (List<byte[]> matchingRecords, int numberOfNodesAccessed) RetrieveValuesMeetingCondition(Func<TKey, bool> condition, TKey minValue, ref Disk disk)
     {
         int numberOfNodesAccessed = 1; //root is 1 
-        List<TKey> matchingKeys = new List<TKey>();
+        List<byte[]> matchingRecords = new List<byte[]>();
         Node<TKey, TValue> currNode = root;
         bool failedCondition = false;
         bool enteredFlag = false;
@@ -166,7 +168,8 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
                     {
                         numberOfNodesAccessed++;
                         leafNode = leafNode.Next;
-                        if(leafNode == null){
+                        if (leafNode == null)
+                        {
                             failedCondition = true;
                             break;
                         }
@@ -175,7 +178,10 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
                     while (condition(leafNode.Keys[index]))
                     {
                         enteredFlag = true;
-                        matchingKeys.Add(leafNode.Keys[index]);
+                        //get record
+                        byte[] data = new byte[recordSize];
+                        data = disk.GetRecordFromAddress(Convert.ToInt64(leafNode.Values[index]));
+                        matchingRecords.Add(data);
                         index++;
                         if (index == leafNode.Keys.Count)
                         {
@@ -192,7 +198,7 @@ public class BPlusTree<TKey, TValue> where TKey : IComparable<TKey>
                 }
             }
         }
-        return (matchingKeys, numberOfNodesAccessed);
+        return (matchingRecords, numberOfNodesAccessed);
     }
 
     public bool Delete(TKey key)

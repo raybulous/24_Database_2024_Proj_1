@@ -25,7 +25,28 @@ public unsafe class Disk
             return (long)p;
         }
     }
-    
+
+    public byte[] GetRecordFromAddress(long address)
+    {
+        unsafe
+        {
+            fixed (byte* start = &_disk[0])
+            {
+                byte* p = (byte*)address;
+                if (p >= start && p < start + _disk.Length)
+                {
+                    byte[] data = new byte[_recordSize];
+                    for (int i = 0; i < _recordSize; i++)
+                    {
+                        data[i] = *(p + i);
+                    }
+                    return data;
+                }
+            }
+        }
+        return null;
+    }
+
     public int BlockCount => _blockCount;
 
     public void WriteBlock(int blockNum, Block block) //write block to Disk
@@ -47,7 +68,7 @@ public unsafe class Disk
         Array.Copy(_disk, blockNum * _blockSize, block.Data, 0, _blockSize);
         return block;
     }
-    
+
     public (List<byte[]> matchingRecords, int blocksAccessed) BruteForceScan(Func<byte[], bool> matchesCondition)
     {
         List<byte[]> matchingRecords = new List<byte[]>();
