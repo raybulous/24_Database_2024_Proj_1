@@ -1,19 +1,20 @@
-﻿namespace _24_Database_2024_Proj_1;
+﻿using _24_Database_2024_Proj_1.tests;
+namespace _24_Database_2024_Proj_1;
 using System;
 class Program
 {
     static void Main(string[] args)
     {
         Experiment experiment = new Experiment(); // Create an instance of the Experiment class
-        experiment.runExp1();
+        experiment.RunExp1();
         Console.WriteLine();
-        experiment.runExp2();
+        experiment.RunExp2();
         Console.WriteLine();
-        experiment.runExp3();
+        experiment.RunExp3();
         Console.WriteLine();
-        experiment.runExp4();
+        experiment.RunExp4();
         Console.WriteLine();
-        experiment.runExp5();
+        experiment.RunExp5();
     }
 }
 

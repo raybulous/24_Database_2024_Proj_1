@@ -32,6 +32,14 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
                 return sibling;
             }
         }
+        else
+        {
+            for (int i = 0; i < Keys.Count; i++)
+            {
+                TKey newKey = Children[i + 1].GetFirstKey();
+                Keys[i] = newKey;
+            }
+        }
         return null;
     }
 
@@ -50,7 +58,7 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         int childrenCount = Children.Count;
         int temp = (int)Math.Ceiling((double)keyCount / 2);
         //newNode gets the second half of the keys and their corresponding children
-        newNode.Keys.AddRange(Keys.GetRange(keyCount - degree / 2, degree / 2)); 
+        newNode.Keys.AddRange(Keys.GetRange(keyCount - degree / 2, degree / 2));
         newNode.Children.AddRange(Children.GetRange(childrenCount - childrenCount / 2, childrenCount / 2));
         //original removes key and children added to newNode
         Keys.RemoveRange(keyCount - temp, temp);
@@ -62,12 +70,12 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         //Update keys 
         for (int i = 0; i < Keys.Count; i++)
         {
-            newKey = Children[i+1].GetFirstKey();
+            newKey = Children[i + 1].GetFirstKey();
             Keys[i] = newKey;
         }
         for (int i = 0; i < parent.Keys.Count; i++)
         {
-            newKey = parent.Children[i+1].GetFirstKey();
+            newKey = parent.Children[i + 1].GetFirstKey();
             parent.Keys[i] = newKey;
         }
         return null;
@@ -80,10 +88,6 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         {
             index++;
         }
-        if (index == Children.Count)
-        {
-            index--;
-        }
         return index;
     }
 
@@ -93,8 +97,8 @@ public class InternalNode<TKey, TValue> : Node<TKey, TValue> where TKey : ICompa
         bool isDeleted;
         do //try deleting from child node, if not found move to next child 
         {
-            isDeleted = Children[index++].Delete(key); 
-        } while (!isDeleted && index < Children.Count); //TODO: CHECK KEY, IF MORE THAN KEY, TERMINATE (REDUCE UNNECESSARY SEARCHING)
+            isDeleted = Children[index++].Delete(key);
+        } while (!isDeleted && index < Children.Count);
         if (!isDeleted)
         {
             return false; // Key not found

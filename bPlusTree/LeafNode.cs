@@ -12,7 +12,7 @@ public class LeafNode<TKey, TValue> : Node<TKey, TValue> where TKey : IComparabl
 
     public override TKey GetFirstKey() //return first key for finding new key value in internal node
     {
-        return Keys.FirstOrDefault();
+        return Keys[0];
     }
 
     public override bool IsOverflow { get { return Keys.Count > BPlusTree<TKey, TValue>.degree; } }
